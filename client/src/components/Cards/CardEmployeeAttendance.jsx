@@ -11,19 +11,21 @@ const CardEmployeeAttendance = () => {
     const [attendance, setAttendance] = useState([]);
     const [isAttendToday, setIsAttendToday] = useState(false);
 
-    const token = JSON.parse(localStorage.getItem("user"));
-
+    // fungsi untuk membuat attendance
     const createAttendance = async (id) => {
         try {
+            // jika terdapat id maka akan memperbaharui attendance berdasarkan id tersebut jika tidak maka akan membuat attendance baru
             const result = await authAxios.post(`/attendance/create/${id}`);
             setResponse(result?.data);
-            window.location.reload();
+            // muat ulang list attendance
+            getAttendanceList();
         } catch (error) {
             setResponse(error?.response?.data);
         }
     };
 
-    const getAttendanceList = async () => {
+    // fungsi untuk mendapatkan list attendance
+    const getAttendanceList = async (e) => {
         try {
             const result = await authAxios.get("/attendance/list");
             setAttendance(result?.data?.data);
@@ -32,7 +34,10 @@ const CardEmployeeAttendance = () => {
         }
     };
 
+    // fungsi untuk mengecek apakah sudah tedapat attendance pada hari tersebut
     const checkIsAttend = () => {
+        const token = JSON.parse(localStorage.getItem("user"));
+        // jika sudah tedapat attendance maka user tidak dapat membuat attendance baru
         const myAttendance = attendance.filter((a) => a.user_id === token.user_id && a.date === new Date().toISOString().split("T")[0]);
         myAttendance.length > 0 ? setIsAttendToday(true) : setIsAttendToday(false);
     };

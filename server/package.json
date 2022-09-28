@@ -9,7 +9,7 @@
         "dev": "nodemon ./src/server.js",
         "migrate": "node-pg-migrate"
     },
-    "author": "Ramdhani Arya & Dani Mulyana",
+    "author": "Ramdhani Arya",
     "license": "ISC",
     "dependencies": {
         "bcrypt": "^5.0.1",

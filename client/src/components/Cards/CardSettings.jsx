@@ -5,17 +5,22 @@ import authAxios from "../../utility/authAxios";
 // components
 const CardSettings = ({ fullname, username, position, division, role, gender }) => {
     const [user, setUser] = useState({ fullname: fullname, username: username, position: position, division: division, role: role, gender: gender });
+    const [response, setResponse] = useState();
 
-    const token = JSON.parse(localStorage.getItem("user"));
-
+    // fungsi untuk menampung perubahan value pada form
     const handleChange = (e) => {
         setUser({ ...user, [e.target.name]: e.target.value });
     };
 
-    const handleClick = (e) => {
-        e.preventDefault();
+    // fungsi untuk melakukan update user berdasarkan data baru
+    const handleClick = async (e) => {
         if (window.confirm("This data is true?") === true) {
-            console.log("OKE");
+            try {
+                const result = await authAxios.put("/users/update/", user);
+                setResponse(result?.data?.data);
+            } catch (error) {
+                setResponse(error?.message?.data);
+            }
         }
     };
 
@@ -99,7 +104,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         name="division"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={user?.division}
-                                        onChange={() => {}}
+                                        onChange={handleChange}
                                     >
                                         <option defaultValue="Employee">Marketing</option>
                                         <option value="HR">HR</option>
@@ -118,7 +123,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         name="role"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={user?.role}
-                                        onChange={() => {}}
+                                        onChange={handleChange}
                                     >
                                         <option defaultValue="Employee">Employee</option>
                                         <option value="Admin">Admin</option>
@@ -136,7 +141,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         name="gender"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={user?.gender}
-                                        onChange={() => {}}
+                                        onChange={handleChange}
                                     >
                                         <option defaultValue="Male">Male</option>
                                         <option value="Female">Female</option>

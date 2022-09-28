@@ -46,11 +46,11 @@ exports.editUser = async (req, res) => {
     try {
         if (req.decoded.role === "Super admin") {
             // jika user yang melakukan update adalah super admin
-            const { fullname, role, division, position } = req.body;
+            const { fullname, role, division, position, gender } = req.body;
             // ambil id user lain
             const { id } = req.params;
             // maka user tersebut dapat mengupdate sebagian besar data dan user lain
-            await updateUser(id, req.decoded.id, req.decoded.role, { fullname, role, division, position });
+            await updateUser(id, req.decoded.id, req.decoded.role, { fullname, role, division, position, gender });
             return res.status(200).json({ message: "Success", status: true });
         }
         // jika user yang melakukan pengeditan bukan super admin hanya bisa melakukan update terhadap dirinya sendiri dan mengganti gambar

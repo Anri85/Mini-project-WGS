@@ -13,7 +13,6 @@ const CardAddUser = () => {
         gender: "Male",
         images: "",
     });
-
     const [response, setResponse] = useState();
 
     // fungsi untuk menangani perubahan dalam inputan

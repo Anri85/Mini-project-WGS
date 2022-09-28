@@ -113,6 +113,23 @@ const Sidebar = () => {
                                 <Link
                                     className={
                                         "text-xs uppercase py-3 font-bold block " +
+                                        (window.location.href.indexOf("/attendance") !== -1
+                                            ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                            : "text-blueGray-700 hover:text-blueGray-500")
+                                    }
+                                    to="/attendance"
+                                >
+                                    <i
+                                        className={"fa fa-address-book mr-2 text-sm " + (window.location.href.indexOf("/attendance") !== -1 ? "opacity-75" : "text-blueGray-300")}
+                                    ></i>{" "}
+                                    My Attendance
+                                </Link>
+                            </li>
+
+                            <li className="items-center">
+                                <Link
+                                    className={
+                                        "text-xs uppercase py-3 font-bold block " +
                                         (window.location.href.indexOf("/settings") !== -1
                                             ? "text-lightBlue-500 hover:text-lightBlue-600"
                                             : "text-blueGray-700 hover:text-blueGray-500")

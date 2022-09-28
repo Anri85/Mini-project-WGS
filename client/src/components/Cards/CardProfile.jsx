@@ -1,10 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
+import authAxios from "../../utility/authAxios";
 
-// components
-// import image from "../../assets/img/team-2-800x800.jpg";
-import image from "../../assets/img/images.jpg";
+const CardProfile = ({ fullname, division, position, image_url }) => {
+    const [data, setData] = useState({ fullname: fullname, division: division, position: position, profile: image_url });
+    const [response, setResponse] = useState();
 
-const CardProfile = () => {
+    // fungsi untuk menampung perubahan file pada form
+    const handleChange = (e) => {
+        setData({ ...data, images: e.target.files[0] });
+    };
+
+    // fungsi untuk melakukan upload gambar berdasarkan userid yang sedang login
+    const handleUpload = async () => {
+        try {
+            const formData = new FormData();
+            formData.append("images", data?.images);
+            const result = await authAxios.post("/users/upload", formData);
+            setResponse(result?.data?.data);
+        } catch (error) {
+            setResponse(error?.message?.data);
+        }
+    };
+
     return (
         <>
             <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-xl rounded-lg mt-16">
@@ -14,7 +31,7 @@ const CardProfile = () => {
                             <div className="relative">
                                 <img
                                     alt="profile"
-                                    src={image}
+                                    src={`http://localhost:5000/images/${data?.profile}`}
                                     className="shadow-xl h-44 w-64 rounded-full h-auto align-middle border-none absolute -m-16 -ml-20 lg:-ml-20 mr-8 max-w-150-px"
                                 />
                             </div>
@@ -25,12 +42,14 @@ const CardProfile = () => {
                                     <label className="block mb-2 text-sm font-extrabold text-gray-300">Change Picture</label>
                                     <input
                                         className="border-0 mb-2 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        name="user-picture"
+                                        name="images"
                                         type="file"
+                                        onChange={handleChange}
                                     ></input>
                                     <button
                                         type="submit"
                                         className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                        onClick={handleUpload}
                                     >
                                         Upload
                                     </button>
@@ -48,17 +67,17 @@ const CardProfile = () => {
                         </div>
                     </div>
                     <div className="text-center mb-10">
-                        <h3 className="text-xl font-semibold leading-normal mb-2 text-blueGray-700 mb-2">Jenna Stones</h3>
-                        <div className="text-sm leading-normal mt-0 mb-2 text-blueGray-400 font-bold uppercase">
+                        <h3 className="text-xl font-semibold leading-normal mb-2 text-blueGray-700 mb-2">{data?.fullname}</h3>
+                        {/* <div className="text-sm leading-normal mt-0 mb-2 text-blueGray-400 font-bold uppercase">
                             <i className="fas fa-map-marker-alt mr-2 text-lg text-blueGray-400"></i> Los Angeles, California
-                        </div>
+                        </div> */}
                         <div className="mb-2 text-blueGray-600 mt-10">
                             <i className="fas fa-briefcase mr-2 text-lg text-blueGray-400"></i>
-                            Solution Manager - Creative Tim Officer
+                            {data?.position} - At Walden Global Services
                         </div>
                         <div className="mb-2 text-blueGray-600">
                             <i className="fas fa-university mr-2 text-lg text-blueGray-400"></i>
-                            University of Computer Science
+                            {data?.division} - At Walden Global Services
                         </div>
                     </div>
                     {/* <div className="mt-10 py-10 border-t border-blueGray-200 text-center">
