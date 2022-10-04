@@ -1,41 +1,40 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { userSelectors } from "../../slice/userSlice";
+
+// import action
+import { getUsers } from "../../api/user";
+
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
 import authAxios from "../../utility/authAxios";
 
 const CardTableUsers = ({ color }) => {
-    const [users, setUsers] = useState([]);
-    const [response, setResponse] = useState();
+    const userData = JSON.parse(localStorage.getItem("user"));
+    // dispatch untuk memanggil API call (action) pada folder api/user (getUsers)
+    const dispatch = useDispatch();
+    // useSelector untuk mengambil data state yang tersimpan pada folder slice/userSlice (userSelector)
+    const users = useSelector(userSelectors.selectAll);
 
-    const token = JSON.parse(localStorage.getItem("user"));
-
-    const getUsers = async () => {
-        try {
-            const result = await authAxios.get("/users/list");
-            setUsers(result?.data?.data);
-            setResponse({ ...response, message: result?.data?.message, status: result?.data?.status });
-        } catch (error) {
-            response(error?.response?.data);
-        }
-    };
+    const [response, setResponse] = useState({ message: "", status: "" });
 
     const handleDelete = async (id) => {
         try {
             if (window.confirm("Are you sure will delete this user?") === true) {
                 const result = await authAxios.delete(`/users/delete/${id}`);
                 setResponse({ ...response, message: result?.data?.message, status: result?.data?.status });
-                window.location.reload();
+                dispatch(getUsers());
             }
             return false;
         } catch (error) {
-            response(error?.response?.data);
+            response({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status });
         }
     };
 
     useEffect(() => {
-        getUsers();
-    }, []);
+        dispatch(getUsers());
+    }, [dispatch]);
 
     return (
         <>
@@ -112,12 +111,12 @@ const CardTableUsers = ({ color }) => {
                                             </Link>
                                             <button
                                                 className={
-                                                    u.id === token.user_id
+                                                    u.id === userData.id
                                                         ? "border-none outline-none focus:outline-none cursor-not-allowed"
                                                         : "border-none outline-none focus:outline-none"
                                                 }
                                                 onClick={() => handleDelete(u.id)}
-                                                disabled={u.id === token.user_id ? true : false}
+                                                disabled={u.id === userData.id ? true : false}
                                             >
                                                 <i className="fa fa-trash mr-2 bg-red-400 text-white active:bg-red-400 px-4 py-2 rounded outline-none"></i>
                                             </button>

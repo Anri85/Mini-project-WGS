@@ -10,24 +10,24 @@ const AuthenticationError = require("../exceptions/AuthenticationError");
 const AuthorizationError = require("../exceptions/AuthorizationError");
 
 // select user
-const selectUser = async (id) => {
-    // jika terdapat id maka ambil user berdasarkan id tersebut
-    if (id) {
-        // merancang perintah query
-        const order = {
-            text: "SELECT fullname, role, division, position, image_url, username FROM users WHERE id = $1",
-            values: [id],
-        };
-        // mengeksekusi query
-        const result = await pool.query(order);
-        if (!result.rowCount) {
-            throw new NotFoundError("User not found");
-        }
-        return result.rows[0];
-    }
+const selectUsers = async () => {
     // jika tidak terdapat id maka ambil semua data user
     const result = await pool.query("SELECT id, fullname, role, division, position, image_url FROM users");
     return result.rows;
+};
+
+const selectSingleUser = async (id) => {
+    // merancang perintah query
+    const order = {
+        text: "SELECT id, fullname, role, division, position, image_url, username FROM users WHERE id = $1",
+        values: [id],
+    };
+    // mengeksekusi query
+    const result = await pool.query(order);
+    if (!result.rowCount) {
+        throw new NotFoundError("User not found");
+    }
+    return result.rows[0];
 };
 
 // tambah seorang user
@@ -142,4 +142,4 @@ const verifyUser = async ({ username, password }) => {
     return { id: result.rows[0].id, fullname: result.rows[0].fullname, role: result.rows[0].role };
 };
 
-module.exports = { addUser, selectUser, updateUser, deleteUser, verifyUser, changeProfile };
+module.exports = { addUser, selectUsers, selectSingleUser, updateUser, deleteUser, verifyUser, changeProfile };

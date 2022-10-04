@@ -12,8 +12,8 @@ const selectAttendance = async (id) => {
     if (id) {
         // merancang perintah query
         const order = {
-            text: `SELECT users.fullname, users.division, users.position, attendance.date, attendance.status, attendance.time_in,
-            attendance.time_out FROM attendance JOIN users ON users.id = attendance.user_id WHERE attendance.id = $1`,
+            text: `SELECT users.id AS user_id, users.fullname, users.division, users.position, attendance.id, attendance.date, attendance.status, attendance.time_in,
+            attendance.time_out FROM attendance JOIN users ON users.id = attendance.user_id WHERE users.id = $1`,
             values: [id],
         };
         // mengeksekusi query
@@ -47,7 +47,7 @@ const insertAttendance = async (data) => {
     const id = `attendance-${nanoid(16)}`;
     // merancang perintah query
     const order = {
-        text: "INSERT INTO attendance VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id",
+        text: "INSERT INTO attendance VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *",
         values: [id, data.fullname, data.date, data.status, data.time_in, data.time_out, data.user_id],
     };
     // mengeksekusi query
@@ -55,6 +55,7 @@ const insertAttendance = async (data) => {
     if (!result.rows[0].id) {
         throw new InvariantError("Attendace creation failed");
     }
+    return result.rows[0];
 };
 
 // mengubah attendance sebelumnya
@@ -71,6 +72,7 @@ const updateAttendance = async (id, data) => {
         if (!result.rows[0].id) {
             throw new InvariantError("Attendance change failed");
         }
+        return result.rows[0].id;
         // jika isUpdate tidak bernilai true maka attendance dilakukan oleh user
     } else {
         // merancang perintah query
@@ -83,6 +85,7 @@ const updateAttendance = async (id, data) => {
         if (!result.rows[0].id) {
             throw new InvariantError("Attendance change failed");
         }
+        return result.rows[0].id;
     }
 };
 

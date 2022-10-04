@@ -4,20 +4,28 @@ import authAxios from "../../utility/authAxios";
 
 // components
 const CardSettings = ({ fullname, username, position, division, role, gender }) => {
-    const [user, setUser] = useState({ fullname: fullname, username: username, position: position, division: division, role: role, gender: gender });
+    const [newData, setNewData] = useState({
+        fullname: fullname,
+        username: username,
+        position: position,
+        division: division,
+        role: role,
+        gender: gender,
+    });
     const [response, setResponse] = useState();
 
     // fungsi untuk menampung perubahan value pada form
     const handleChange = (e) => {
-        setUser({ ...user, [e.target.name]: e.target.value });
+        setNewData({ ...newData, [e.target.name]: e.target.value });
     };
 
     // fungsi untuk melakukan update user berdasarkan data baru
     const handleClick = async (e) => {
         if (window.confirm("This data is true?") === true) {
             try {
-                const result = await authAxios.put("/users/update/", user);
+                const result = await authAxios.put("/users/update/", newData);
                 setResponse(result?.data?.data);
+                window.location.reload();
             } catch (error) {
                 setResponse(error?.message?.data);
             }
@@ -51,7 +59,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                     <input
                                         type="text"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        value={user?.username}
+                                        value={newData?.username}
                                         readOnly={true}
                                     />
                                 </div>
@@ -65,7 +73,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         type="email"
                                         name="fullname"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        value={user?.fullname}
+                                        value={newData?.fullname}
                                         onChange={handleChange}
                                     />
                                 </div>
@@ -85,7 +93,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         id="position"
                                         name="position"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        value={user?.position}
+                                        value={newData?.position}
                                         onChange={handleChange}
                                     >
                                         <option defaultValue="Employee">Employee</option>
@@ -103,7 +111,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         id="division"
                                         name="division"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        value={user?.division}
+                                        value={newData?.division}
                                         onChange={handleChange}
                                     >
                                         <option defaultValue="Employee">Marketing</option>
@@ -122,7 +130,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         id="role"
                                         name="role"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        value={user?.role}
+                                        value={newData?.role}
                                         onChange={handleChange}
                                     >
                                         <option defaultValue="Employee">Employee</option>
@@ -140,7 +148,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         id="gender"
                                         name="gender"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                        value={user?.gender}
+                                        value={newData?.gender}
                                         onChange={handleChange}
                                     >
                                         <option defaultValue="Male">Male</option>
@@ -149,7 +157,6 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                 </div>
                             </div>
                         </div>
-
                         <hr className="mt-6 border-b-1 border-blueGray-300" />
                     </form>
                 </div>

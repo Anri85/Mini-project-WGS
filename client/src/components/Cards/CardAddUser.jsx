@@ -1,7 +1,12 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { create } from "../../slice/userSlice";
+
 import authAxios from "../../utility/authAxios";
 
 const CardAddUser = () => {
+    const dispatch = useDispatch();
+
     // buat state untuk mennyimpan data type input, data type select dan data type file
     const [newUserData, setNewUserData] = useState({
         fullname: "",
@@ -36,6 +41,7 @@ const CardAddUser = () => {
             formData.append(key.toString(), newUserData[key]);
         }
         try {
+            // USE DISPATCH DISINI (BELUM DIAPLIKASIKAN)
             const result = await authAxios.post("/users/create", formData);
             setResponse(result?.data);
         } catch (error) {

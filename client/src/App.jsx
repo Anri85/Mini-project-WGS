@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 // views
 import Dashboard from "./views/admin/Dashboard";
@@ -11,18 +11,34 @@ import Attendance from "./views/admin/Attendance";
 import Admin from "./layouts/Admin";
 import Auth from "./layouts/Auth";
 
+const useAuth = () => {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    return userData === null ? false : userData;
+};
+
 const App = () => {
+    const isAuth = useAuth();
     return (
         <>
             <BrowserRouter>
                 <Routes>
                     <Route path="/login" element={<Auth />} />
                     <Route element={<Admin />}>
-                        <Route path="/" element={<Dashboard />} />
-                        <Route path="/attendance" element={<Attendance />} />
-                        <Route path="/settings" element={<Settings />} />
-                        <Route path="/create" element={<CreateUser />} />
-                        <Route path="/tables" element={<Tables />} />
+                        {isAuth.role === "Super admin" || isAuth.role === "Admin" ? (
+                            <>
+                                <Route path="/" element={<Attendance />} />
+                                <Route path="/attendance" element={<Dashboard />} />
+                                <Route path="/settings" element={<Settings />} />
+                                <Route path="/create" element={<CreateUser />} />
+                                <Route path="/tables" element={<Tables />} />
+                            </>
+                        ) : (
+                            <>
+                                <Route path="/" element={<Attendance />} />
+                                <Route path="/settings" element={<Settings />} />
+                            </>
+                        )}
+                        <Route path="*" element={<Navigate to="/" />} />
                     </Route>
                 </Routes>
             </BrowserRouter>

@@ -14,9 +14,8 @@ exports.authenticateUser = async (req, res) => {
         const refresh_token = tokenManager.generateRefreshToken({ id, fullname, role });
         // simpan refresh token kedalam database
         await saveRefreshToken(refresh_token);
-        return res.status(200).json({ message: "Success", status: true, access_token, refresh_token, role, id });
+        return res.status(200).json({ message: "Success", status: true, data: { access_token, refresh_token, role, id } });
     } catch (error) {
-        console.log(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ status: false, message: error.message });

@@ -1,6 +1,6 @@
 const ClientError = require("../exceptions/ClientError");
 
-const { addUser, selectUser, deleteUser, updateUser, changeProfile } = require("../services/userService");
+const { addUser, selectUsers, selectSingleUser, deleteUser, updateUser, changeProfile } = require("../services/userService");
 
 exports.getAllUsers = async (req, res) => {
     try {
@@ -8,11 +8,33 @@ exports.getAllUsers = async (req, res) => {
         if (req.decoded.role !== "Super admin") {
             return res.status(403).json({ message: "Forbidden to access this resource", status: false });
         }
-        const { id } = req.params;
-        const users = await selectUser(id);
+        const users = await selectUsers();
         return res.status(200).json({ message: "Success", status: true, data: users });
     } catch (error) {
         console.error(error);
+        // jika error merupakan kesalahan pengguna
+        if (error instanceof ClientError) {
+            return res.status(error.statusCode).json({ message: error.message, status: false });
+        }
+        // jika server mengalami error
+        return res.status(500).json({ message: "Something went wrong", status: false });
+    }
+};
+
+exports.getSingleUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.decoded.id;
+        // jika terdapat parameter id maka cari user berdasarkan id tersebut
+        if (id) {
+            const user = await selectSingleUser(id);
+            return res.status(200).json({ message: "Success", status: true, data: user });
+        } else {
+            // jika tidak ada maka cari user berdasarkan user yang sedang login
+            const user = await selectSingleUser(userId);
+            return res.status(200).json({ message: "Success", status: true, data: user });
+        }
+    } catch (error) {
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });

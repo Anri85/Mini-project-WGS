@@ -5,7 +5,14 @@ import { Link, useNavigate } from "react-router-dom";
 
 import image from "../../assets/img/team-1-800x800.jpg";
 
+const useAuth = () => {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    return userData === null ? false : userData;
+};
+
 const Sidebar = () => {
+    const isAuth = useAuth();
+
     const navigate = useNavigate();
 
     const [collapseShow, setCollapseShow] = useState("hidden");
@@ -97,79 +104,128 @@ const Sidebar = () => {
                         {/* Navigation */}
 
                         <ul className="md:flex-col md:min-w-full flex flex-col list-none">
-                            <li className="items-center">
-                                <Link
-                                    className={
-                                        "text-xs uppercase py-3 font-bold block " +
-                                        (window.location.href.indexOf("/") !== -1 ? "text-lightBlue-500 hover:text-lightBlue-600" : "text-blueGray-700 hover:text-blueGray-500")
-                                    }
-                                    to="/"
-                                >
-                                    <i className={"fas fa-tv mr-2 text-sm " + (window.location.href.indexOf("/") !== -1 ? "opacity-75" : "text-blueGray-300")}></i> Dashboard
-                                </Link>
-                            </li>
+                            {isAuth.role === "Super admin" || isAuth.role === "Admin" ? (
+                                <>
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/"
+                                        >
+                                            <i className={"fas fa-tv mr-2 text-sm " + (window.location.href.indexOf("/") !== -1 ? "opacity-75" : "text-blueGray-300")}></i>{" "}
+                                            Dashboard
+                                        </Link>
+                                    </li>
 
-                            <li className="items-center">
-                                <Link
-                                    className={
-                                        "text-xs uppercase py-3 font-bold block " +
-                                        (window.location.href.indexOf("/attendance") !== -1
-                                            ? "text-lightBlue-500 hover:text-lightBlue-600"
-                                            : "text-blueGray-700 hover:text-blueGray-500")
-                                    }
-                                    to="/attendance"
-                                >
-                                    <i
-                                        className={"fa fa-address-book mr-2 text-sm " + (window.location.href.indexOf("/attendance") !== -1 ? "opacity-75" : "text-blueGray-300")}
-                                    ></i>{" "}
-                                    My Attendance
-                                </Link>
-                            </li>
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/attendance") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/attendance"
+                                        >
+                                            <i
+                                                className={
+                                                    "fa fa-address-book mr-2 text-sm " + (window.location.href.indexOf("/attendance") !== -1 ? "opacity-75" : "text-blueGray-300")
+                                                }
+                                            ></i>{" "}
+                                            Attendance List
+                                        </Link>
+                                    </li>
 
-                            <li className="items-center">
-                                <Link
-                                    className={
-                                        "text-xs uppercase py-3 font-bold block " +
-                                        (window.location.href.indexOf("/settings") !== -1
-                                            ? "text-lightBlue-500 hover:text-lightBlue-600"
-                                            : "text-blueGray-700 hover:text-blueGray-500")
-                                    }
-                                    to="/settings"
-                                >
-                                    <i className={"fas fa-tools mr-2 text-sm " + (window.location.href.indexOf("/settings") !== -1 ? "opacity-75" : "text-blueGray-300")}></i>{" "}
-                                    Settings
-                                </Link>
-                            </li>
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/settings") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/settings"
+                                        >
+                                            <i
+                                                className={"fas fa-tools mr-2 text-sm " + (window.location.href.indexOf("/settings") !== -1 ? "opacity-75" : "text-blueGray-300")}
+                                            ></i>{" "}
+                                            Settings
+                                        </Link>
+                                    </li>
 
-                            <li className="items-center">
-                                <Link
-                                    className={
-                                        "text-xs uppercase py-3 font-bold block " +
-                                        (window.location.href.indexOf("/create") !== -1
-                                            ? "text-lightBlue-500 hover:text-lightBlue-600"
-                                            : "text-blueGray-700 hover:text-blueGray-500")
-                                    }
-                                    to="/create"
-                                >
-                                    <i className={"fa fa-plus-square mr-2 text-sm " + (window.location.href.indexOf("/create") !== -1 ? "opacity-75" : "text-blueGray-300")}></i>{" "}
-                                    Add new user
-                                </Link>
-                            </li>
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/create") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/create"
+                                        >
+                                            <i
+                                                className={
+                                                    "fa fa-plus-square mr-2 text-sm " + (window.location.href.indexOf("/create") !== -1 ? "opacity-75" : "text-blueGray-300")
+                                                }
+                                            ></i>{" "}
+                                            Add new user
+                                        </Link>
+                                    </li>
 
-                            <li className="items-center">
-                                <Link
-                                    className={
-                                        "text-xs uppercase py-3 font-bold block " +
-                                        (window.location.href.indexOf("/tables") !== -1
-                                            ? "text-lightBlue-500 hover:text-lightBlue-600"
-                                            : "text-blueGray-700 hover:text-blueGray-500")
-                                    }
-                                    to="/tables"
-                                >
-                                    <i className={"fas fa-table mr-2 text-sm " + (window.location.href.indexOf("/tables") !== -1 ? "opacity-75" : "text-blueGray-300")}></i> Users
-                                    Table
-                                </Link>
-                            </li>
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/tables") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/tables"
+                                        >
+                                            <i className={"fas fa-table mr-2 text-sm " + (window.location.href.indexOf("/tables") !== -1 ? "opacity-75" : "text-blueGray-300")}></i>{" "}
+                                            Users Table
+                                        </Link>
+                                    </li>
+                                </>
+                            ) : (
+                                <>
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/"
+                                        >
+                                            <i className={"fas fa-tv mr-2 text-sm " + (window.location.href.indexOf("/") !== -1 ? "opacity-75" : "text-blueGray-300")}></i>{" "}
+                                            Dashboard
+                                        </Link>
+                                    </li>
+
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/settings") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/settings"
+                                        >
+                                            <i
+                                                className={"fas fa-tools mr-2 text-sm " + (window.location.href.indexOf("/settings") !== -1 ? "opacity-75" : "text-blueGray-300")}
+                                            ></i>{" "}
+                                            Settings
+                                        </Link>
+                                    </li>
+                                </>
+                            )}
                         </ul>
 
                         {/* Divider */}

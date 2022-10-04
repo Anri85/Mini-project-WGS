@@ -1,46 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import { useSelector, useDispatch } from "react-redux";
 import { attendanceSelectors } from "../../slice/attendanceSlice";
 
 // import action
-import { getUserAttendance, addAttendance } from "../../api/attendance";
+import { getAttendance } from "../../api/attendance";
 
-// components
-// import Modal from "../Modal/Modal";
-
-const userData = JSON.parse(localStorage.getItem("user"));
-
-const CardEmployeeAttendance = () => {
+const CardAttendance = () => {
     // dispatch untuk melakukan API call (action) pada folder api/user (getUsers)
     const dispatch = useDispatch();
     // useSelector untuk mengambil data state yang tersimpan pada folder slice/userSlice (userSelector)
-    const myAttendance = useSelector(attendanceSelectors.selectAll);
+    const attendance = useSelector(attendanceSelectors.selectAll);
 
-    // const [openModal, setOpenModal] = useState(false);
-    const [isAttendToday, setIsAttendToday] = useState(false);
-
-    // fungsi untuk membuat attendance
-    const createAttendance = (id) => {
-        dispatch(addAttendance(id));
-        dispatch(getUserAttendance(userData?.id));
-    };
-
-    // fungsi untuk mengecek apakah sudah tedapat attendance pada hari tersebut
-    const checkIsAttend = () => {
-        // jika sudah tedapat attendance maka user tidak dapat membuat attendance
-        const isAttended = myAttendance.filter((a) => a.user_id === userData.id && a.date === new Date().toISOString().split("T")[0]);
-        isAttended.length > 0 ? setIsAttendToday(true) : setIsAttendToday(false);
+    const getAllAttendance = () => {
+        dispatch(getAttendance());
     };
 
     useEffect(() => {
-        dispatch(getUserAttendance(userData?.id));
+        dispatch(getAttendance());
     }, [dispatch]);
-
-    useEffect(() => {
-        checkIsAttend();
-    }, [myAttendance]);
 
     return (
         <>
@@ -48,16 +27,15 @@ const CardEmployeeAttendance = () => {
                 <div className="rounded-t mb-0 px-4 py-3 border-0">
                     <div className="flex flex-wrap items-center">
                         <div className="relative w-full px-4 max-w-full flex-grow flex-1">
-                            <h3 className="font-semibold text-base text-blueGray-700">Your Attendance List</h3>
+                            <h3 className="font-semibold text-base text-blueGray-700">Employee Attendance</h3>
                         </div>
-                        <div className={isAttendToday ? "hidden" : "relative w-full px-4 max-w-full flex-grow flex-1 text-right"}>
+                        <div className="relative w-full px-4 max-w-full flex-grow flex-1 text-right">
                             <button
                                 className="bg-indigo-500 text-white active:bg-indigo-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                                 type="button"
-                                onClick={() => createAttendance("")}
-                                disabled={isAttendToday}
+                                onClick={getAllAttendance}
                             >
-                                Create Attendance
+                                <i className="fa fa-refresh mr-2" aria-hidden="true"></i>Refresh
                             </button>
                         </div>
                     </div>
@@ -90,8 +68,8 @@ const CardEmployeeAttendance = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {myAttendance.length > 0 ? (
-                                myAttendance.map((a) => (
+                            {attendance.length > 0 ? (
+                                attendance.map((a) => (
                                     <tr key={a.id}>
                                         <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">{a.id}</th>
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">{a.fullname}</td>
@@ -109,15 +87,7 @@ const CardEmployeeAttendance = () => {
                                             </button>
                                         </td>
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">{a.time_in}</td>
-                                        <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                                            {a.time_out ? (
-                                                a.time_out
-                                            ) : (
-                                                <button className="bg-red-500/100 px-3 py-1 rounded outline-none text-white uppercase" onClick={() => createAttendance(a.id)}>
-                                                    <i className="fa fa-external-link"></i> Go Home
-                                                </button>
-                                            )}
-                                        </td>
+                                        <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">{a.time_out ? a.time_out : "-"}</td>
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                                             <button
                                                 className="bg-sky-500 text-white active:bg-sky-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
@@ -139,13 +109,8 @@ const CardEmployeeAttendance = () => {
                     </table>
                 </div>
             </div>
-            {/* {openModal && (
-                <>
-                    <Modal setOpenModal={setOpenModal} />
-                </>
-            )} */}
         </>
     );
 };
 
-export default CardEmployeeAttendance;
+export default CardAttendance;

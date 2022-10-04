@@ -5,18 +5,11 @@ const { insertAttendance, selectAttendance, updateAttendance, removeAttendance }
 // mengambil list attendance oleh user
 exports.getAttendanceList = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { role } = req.decoded;
-        // jika terdapat id maka tampilkan detail attendance beserta usernya
-        if (id !== undefined || id !== "") {
-            const attendance = await selectAttendance(id);
-            return res.status(200).json({ message: "Success", status: true, data: attendance });
-        }
-        // hanya admin yang dapat melihat semuan attendance
-        if (role === "super admin") {
+        if (req.decoded.role === "Super admin") {
             const attendance = await selectAttendance();
             return res.status(200).json({ message: "Success", status: true, data: attendance });
         }
+        return res.status(403).json({ message: "Forbidden to access this resource", status: false });
     } catch (error) {
         console.error(error);
         // jika error merupakan kesalahan pengguna
@@ -34,23 +27,22 @@ exports.createAttendance = async (req, res) => {
     const rawDate = new Date();
     const date = rawDate.toISOString().split("T")[0];
     try {
-        // cek jika id attendance tersedia (sudah pernah absen time_in)
-        if (id === undefined) {
-            // jika tidak tersedia maka create attendance baru (belum absen pada hari itu)
-            await insertAttendance({
-                status: "Attended",
-                fullname: req.decoded.fullname,
-                date,
-                time_in: rawDate.toLocaleTimeString(),
-                time_out: "",
-                user_id: req.decoded.id,
-            });
-            return res.status(201).json({ message: "Success", status: true });
-        } else {
+        // cek jika id attendance tersedia (belum pernah absen time_in)
+        if (id) {
             // jika tersedia maka lakukan update attendance berdasarkan id tersebut
-            await updateAttendance(id, { status: "Unattended", time_out: rawDate.toLocaleTimeString() });
-            return res.status(201).json({ message: "Success", status: true });
+            const attendanceId = await updateAttendance(id, { status: "Unattended", time_out: rawDate.toLocaleTimeString() });
+            return res.status(201).json({ message: "Success", status: true, data: { id: attendanceId } });
         }
+        // jika tidak tersedia maka create attendance baru (belum absen pada hari itu)
+        const data = await insertAttendance({
+            status: "Attended",
+            fullname: req.decoded.fullname,
+            date,
+            time_in: rawDate.toLocaleTimeString(),
+            time_out: "",
+            user_id: req.decoded.id,
+        });
+        return res.status(201).json({ message: "Success", status: true, data });
     } catch (error) {
         console.error(error);
         // jika error merupakan kesalahan pengguna
@@ -65,9 +57,17 @@ exports.createAttendance = async (req, res) => {
 // get detail attendance by all user
 exports.getDetailAttendance = async (req, res) => {
     try {
-        res.send("Detail attendance");
+        const { id } = req.params;
+        const attendance = await selectAttendance(id);
+        return res.status(200).json({ message: "Success", status: true, data: attendance });
     } catch (error) {
         console.log(error);
+        // jika error merupakan kesalahan pengguna
+        if (error instanceof ClientError) {
+            return res.status(error.statusCode).json({ message: error.message, status: false });
+        }
+        // jika server mengalami error
+        return res.status(500).json({ message: "Something went wrong", status: false });
     }
 };
 

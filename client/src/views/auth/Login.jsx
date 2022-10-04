@@ -1,48 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
+
+const useAuth = () => {
+    const userData = localStorage.getItem("user");
+    return userData === null ? false : true;
+};
 
 const Login = () => {
-    const navigate = useNavigate();
+    const isLogin = useAuth();
 
+    const [response, setResponse] = useState({ message: "", status: "" });
     const [auth, setAuth] = useState();
-    const [exception, setException] = useState();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // cek jika user telah menginput username dan password
         if (auth) {
             try {
-                // lakukan panggilan api pada backend dengan payload yang diinputkan sebelumnya
-                const { data } = await axios.post("http://localhost:5000/api/user/authentication", { username: auth.username, password: auth.password });
-                // jika tidak terjadi error simpan response dari backend kedalam localstorage
-                localStorage.setItem("user", JSON.stringify({ access_token: data?.access_token, refresh_token: data?.refresh_token, role: data?.role, user_id: data?.id }));
-                // redirect ke halaman admin
-                navigate("/");
+                const result = await axios.post("http://localhost:5000/api/user/authentication", auth);
+                localStorage.setItem("user", JSON.stringify(result?.data?.data));
+                setResponse({ ...response, message: result?.data?.message, status: result?.data?.status });
+                window.location.replace("/");
             } catch (error) {
-                // jika terjadi error tangkap error message dan simpan dalam state
-                setException(error?.response?.data);
+                setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status });
             }
-        } else {
-            return false;
         }
     };
-
-    // tampilkan error message dengan alert (rencananya)
-    useEffect(() => {
-        // cek jika user telah login
-        const isLogin = JSON.parse(localStorage.getItem("user"));
-        // jika telah login maka user tidak bisa mengakses halaman login sebelum melakukan logout
-        if (isLogin) navigate("/");
-        // tampilkan jika terjadi error
-        console.log(exception);
-    }, [exception]);
-
-    return (
+    return isLogin ? (
+        <Navigate to="/" />
+    ) : (
         <>
             <div className="container mx-auto px-4 h-full">
                 <div className="flex content-center items-center justify-center h-full">
                     <div className="w-full lg:w-4/12 px-4">
+                        {response.status === false && (
+                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-3 rounded relative" role="alert">
+                                <p className="font-bold text-center">{response.message}</p>
+                            </div>
+                        )}
                         <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200 border-0">
                             <div className="rounded-t mb-0 px-6 py-6">
                                 <div className="text-center mb-3">
