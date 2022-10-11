@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 
-import authAxios from "../../utility/authAxios";
+import useAxiosPrivate from "../../api/useAxiosPrivate";
 
 // components
-const CardSettings = ({ fullname, username, position, division, role, gender }) => {
+const CardSettings = ({ fullname, username, position, division, role, gender, setResponse }) => {
+    const axiosPrivate = useAxiosPrivate();
+
     const [newData, setNewData] = useState({
         fullname: fullname,
         username: username,
@@ -12,7 +14,6 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
         role: role,
         gender: gender,
     });
-    const [response, setResponse] = useState();
 
     // fungsi untuk menampung perubahan value pada form
     const handleChange = (e) => {
@@ -21,14 +22,19 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
 
     // fungsi untuk melakukan update user berdasarkan data baru
     const handleClick = async (e) => {
-        if (window.confirm("This data is true?") === true) {
-            try {
-                const result = await authAxios.put("/users/update/", newData);
-                setResponse(result?.data?.data);
-                window.location.reload();
-            } catch (error) {
-                setResponse(error?.message?.data);
+        e.preventDefault();
+        if (newData.fullname !== "") {
+            if (window.confirm("This data is true?") === true) {
+                try {
+                    const result = await axiosPrivate.put("/users/update/", newData);
+                    setResponse(result?.data?.data);
+                    window.location.reload();
+                } catch (error) {
+                    setResponse(error?.message?.data);
+                }
             }
+        } else {
+            setResponse({ message: "The 'Fullname' column cannot be empty", status: false });
         }
     };
 
@@ -42,6 +48,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                             className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                             type="button"
                             onClick={handleClick}
+                            disabled={newData?.role === "Employee" ? true : false}
                         >
                             Save Change
                         </button>
@@ -75,6 +82,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={newData?.fullname}
                                         onChange={handleChange}
+                                        readOnly={newData?.role === "Employee" ? true : false}
                                     />
                                 </div>
                             </div>
@@ -95,6 +103,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={newData?.position}
                                         onChange={handleChange}
+                                        disabled={newData?.role === "Employee" ? true : false}
                                     >
                                         <option defaultValue="Employee">Employee</option>
                                         <option value="Manager">Manager</option>
@@ -113,6 +122,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={newData?.division}
                                         onChange={handleChange}
+                                        disabled={newData?.role === "Employee" ? true : false}
                                     >
                                         <option defaultValue="Employee">Marketing</option>
                                         <option value="HR">HR</option>
@@ -132,6 +142,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={newData?.role}
                                         onChange={handleChange}
+                                        disabled={newData?.role === "Employee" ? true : false}
                                     >
                                         <option defaultValue="Employee">Employee</option>
                                         <option value="Admin">Admin</option>
@@ -150,6 +161,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender }) 
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={newData?.gender}
                                         onChange={handleChange}
+                                        disabled={newData?.role === "Employee" ? true : false}
                                     >
                                         <option defaultValue="Male">Male</option>
                                         <option value="Female">Female</option>

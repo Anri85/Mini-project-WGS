@@ -1,12 +1,8 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { create } from "../../slice/userSlice";
 
 import authAxios from "../../utility/authAxios";
 
 const CardAddUser = () => {
-    const dispatch = useDispatch();
-
     // buat state untuk mennyimpan data type input, data type select dan data type file
     const [newUserData, setNewUserData] = useState({
         fullname: "",
@@ -18,6 +14,7 @@ const CardAddUser = () => {
         gender: "Male",
         images: "",
     });
+    const [preview, setPreview] = useState();
     const [response, setResponse] = useState();
 
     // fungsi untuk menangani perubahan dalam inputan
@@ -25,6 +22,8 @@ const CardAddUser = () => {
         // jika input bertype file maka masukan kedalam state images
         if (e.target.type === "file") {
             setNewUserData({ ...newUserData, images: e.target.files[0] });
+            const imageURL = URL.createObjectURL(e.target.files[0]);
+            setPreview(imageURL);
         } else {
             // jika inputan bukan bertype file maka simpan kedalam state dengan menyesuaikan pasangan name dan valuenya
             setNewUserData({ ...newUserData, [e.target.name]: e.target.value });
@@ -34,18 +33,21 @@ const CardAddUser = () => {
     // fungsi untuk memanggil api dan mengirimkan data pada backend
     const handleClick = async (e) => {
         e.preventDefault();
-        // karena pengiriman data berbarengan dengan mengirim file maka data harus dirubah menjadi format form data
-        const formData = new FormData();
-        // lakukan looping untuk append kedalam formdata berdasarkan key dan value dari state newUserData
-        for (let key in newUserData) {
-            formData.append(key.toString(), newUserData[key]);
-        }
-        try {
-            // USE DISPATCH DISINI (BELUM DIAPLIKASIKAN)
-            const result = await authAxios.post("/users/create", formData);
-            setResponse(result?.data);
-        } catch (error) {
-            setResponse(error?.response?.data);
+        if (newUserData.fullname !== "" && newUserData.username !== "" && newUserData.password !== "" && newUserData.images !== "") {
+            // karena pengiriman data berbarengan dengan mengirim file maka data harus dirubah menjadi format form data
+            const formData = new FormData();
+            // lakukan looping untuk append kedalam formdata berdasarkan key dan value dari state newUserData
+            for (let key in newUserData) {
+                formData.append(key.toString(), newUserData[key]);
+            }
+            try {
+                const result = await authAxios.post("/users/create", formData);
+                setResponse({ ...response, message: result?.data?.message, status: result?.data?.status, statusCode: result?.status });
+            } catch (error) {
+                setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: error?.response?.status });
+            }
+        } else {
+            setResponse({ message: "Please fill all the forms correctly", status: false, statusCode: 400 });
         }
     };
 
@@ -56,25 +58,60 @@ const CardAddUser = () => {
                     <div className="text-center flex justify-between">
                         <h6 className="text-blueGray-700 text-xl font-bold">Add new user</h6>
                         {response && (
-                            <div
-                                className={
-                                    response?.status === true
-                                        ? "flex items-center bg-blue-500 text-white text-sm font-bold px-4 py-3"
-                                        : "flex items-center bg-red-500 text-white text-sm font-bold px-4 py-3"
-                                }
-                                role="alert"
-                            >
-                                <svg className="fill-current w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path d="M12.432 0c1.34 0 2.01.912 2.01 1.957 0 1.305-1.164 2.512-2.679 2.512-1.269 0-2.009-.75-1.974-1.99C9.789 1.436 10.67 0 12.432 0zM8.309 20c-1.058 0-1.833-.652-1.093-3.524l1.214-5.092c.211-.814.246-1.141 0-1.141-.317 0-1.689.562-2.502 1.117l-.528-.88c2.572-2.186 5.531-3.467 6.801-3.467 1.057 0 1.233 1.273.705 3.23l-1.391 5.352c-.246.945-.141 1.271.106 1.271.317 0 1.357-.392 2.379-1.207l.6.814C12.098 19.02 9.365 20 8.309 20z" />
-                                </svg>
-                                <p>{response?.message}</p>
-                            </div>
+                            <>
+                                <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
+                                    <div className="relative w-auto my-6 mx-auto max-w-3xl">
+                                        <div
+                                            className={
+                                                response?.status === false
+                                                    ? "flex p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800"
+                                                    : "flex p-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-200 dark:text-green-800"
+                                            }
+                                            role="alert"
+                                        >
+                                            <svg
+                                                aria-hidden="true"
+                                                className="flex-shrink-0 inline w-5 h-5 mr-3"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                    clipRule="evenodd"
+                                                ></path>
+                                            </svg>
+                                            <span className="sr-only">Info</span>
+                                            <div>
+                                                <span className="font-medium">Warning!</span> {response?.message}
+                                            </div>
+                                            <button
+                                                className="ml-2"
+                                                onClick={() => {
+                                                    setResponse();
+                                                }}
+                                            >
+                                                <i className="fa fa-window-close bg-dark text-xl" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+                            </>
                         )}
                     </div>
                 </div>
                 <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
                     <form>
                         <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">Employee Identity</h6>
+                        <img
+                            src={preview ? preview : "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909__340.png"}
+                            alt="preview"
+                            className="rounded-md ml-4 mb-3"
+                            width={200}
+                            height={200}
+                        />
                         <div className="flex flex-wrap">
                             <div className="w-full lg:w-6/12 px-4">
                                 <div className="relative w-full mb-3">
@@ -85,12 +122,23 @@ const CardAddUser = () => {
                                                 type="file"
                                                 name="images"
                                                 onChange={handleChange}
+                                                required
                                                 className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                             />
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            {/* <div className="w-full lg:w-6/12 px-4">
+                                <div className="relative w-full mb-3">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700">Photo</label>
+                                        <div className="mt-1 flex items-center">
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> */}
                             <div className="w-full lg:w-6/12 px-4">
                                 <div className="relative w-full mb-3">
                                     <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="grid-password">
@@ -101,7 +149,7 @@ const CardAddUser = () => {
                                         name="fullname"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         placeholder="Insert fullname..."
-                                        required={true}
+                                        required
                                         onChange={handleChange}
                                     />
                                 </div>
@@ -116,7 +164,7 @@ const CardAddUser = () => {
                                         name="username"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         placeholder="Insert username..."
-                                        required={true}
+                                        required
                                         onChange={handleChange}
                                     />
                                 </div>
@@ -131,7 +179,7 @@ const CardAddUser = () => {
                                         name="password"
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         placeholder="Create password..."
-                                        required={true}
+                                        required
                                         onChange={handleChange}
                                     />
                                 </div>

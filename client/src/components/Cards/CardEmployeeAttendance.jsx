@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { useSelector, useDispatch } from "react-redux";
-import { attendanceSelectors } from "../../slice/attendanceSlice";
-
-// import action
-import { getUserAttendance, addAttendance } from "../../api/attendance";
+import useAxiosPrivate from "../../api/useAxiosPrivate";
 
 // components
 // import Modal from "../Modal/Modal";
@@ -13,38 +9,82 @@ import { getUserAttendance, addAttendance } from "../../api/attendance";
 const userData = JSON.parse(localStorage.getItem("user"));
 
 const CardEmployeeAttendance = () => {
-    // dispatch untuk melakukan API call (action) pada folder api/user (getUsers)
-    const dispatch = useDispatch();
-    // useSelector untuk mengambil data state yang tersimpan pada folder slice/userSlice (userSelector)
-    const myAttendance = useSelector(attendanceSelectors.selectAll);
+    const [myAttendance, setMyAttendance] = useState([]);
+    const [response, setResponse] = useState({ message: "", status: "", statusCode: "" });
+
+    const axiosPrivate = useAxiosPrivate();
 
     // const [openModal, setOpenModal] = useState(false);
     const [isAttendToday, setIsAttendToday] = useState(false);
 
     // fungsi untuk membuat attendance
-    const createAttendance = (id) => {
-        dispatch(addAttendance(id));
-        dispatch(getUserAttendance(userData?.id));
+    const createAttendance = async (attendanceId) => {
+        try {
+            await axiosPrivate.post(`/attendance/create/${attendanceId}`);
+            getMyAttendance(userData?.id);
+        } catch (error) {
+            setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: error?.response?.status });
+        }
     };
 
-    // fungsi untuk mengecek apakah sudah tedapat attendance pada hari tersebut
-    const checkIsAttend = () => {
-        // jika sudah tedapat attendance maka user tidak dapat membuat attendance
-        const isAttended = myAttendance.filter((a) => a.user_id === userData.id && a.date === new Date().toISOString().split("T")[0]);
-        isAttended.length > 0 ? setIsAttendToday(true) : setIsAttendToday(false);
+    // fungsi mengambil attendance list (berdasarkan userId)
+    const getMyAttendance = async (userId) => {
+        try {
+            const result = await axiosPrivate.get(`/attendance/list/my/${userId}`);
+            // fungsi untuk mengecek apakah sudah tedapat attendance pada hari tersebut
+            const isAttended = result?.data?.data.filter((a) => a.user_id === userData.id && a.date === new Date().toISOString().split("T")[0]);
+            // jika sudah tedapat attendance maka user tidak dapat membuat attendance
+            isAttended.length > 0 ? setIsAttendToday(true) : setIsAttendToday(false);
+            // set attendance list dalam state
+            setMyAttendance(result?.data?.data);
+        } catch (error) {
+            setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: error?.response?.status });
+        }
     };
 
     useEffect(() => {
-        dispatch(getUserAttendance(userData?.id));
-    }, [dispatch]);
-
-    useEffect(() => {
-        checkIsAttend();
-    }, [myAttendance]);
+        getMyAttendance(userData?.id);
+    }, []);
 
     return (
         <>
-            <div className="relative flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
+            <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
+                {response?.statusCode === 404 && (
+                    <>
+                        <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
+                            <div className="relative w-auto my-6 mx-auto max-w-3xl">
+                                <div className="flex p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
+                                    <svg
+                                        aria-hidden="true"
+                                        className="flex-shrink-0 inline w-5 h-5 mr-3"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                            clipRule="evenodd"
+                                        ></path>
+                                    </svg>
+                                    <span className="sr-only">Info</span>
+                                    <div>
+                                        <span className="font-medium">Warning!</span> {response?.message}
+                                    </div>
+                                    <button
+                                        className="ml-2"
+                                        onClick={() => {
+                                            setResponse({ ...response, message: "", status: "", statusCode: "" });
+                                        }}
+                                    >
+                                        <i className="fa fa-window-close bg-dark text-xl" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="opacity-25 fixed inset-0 z-40 bg-black"></div>
+                    </>
+                )}
                 <div className="rounded-t mb-0 px-4 py-3 border-0">
                     <div className="flex flex-wrap items-center">
                         <div className="relative w-full px-4 max-w-full flex-grow flex-1">
@@ -123,7 +163,7 @@ const CardEmployeeAttendance = () => {
                                                 className="bg-sky-500 text-white active:bg-sky-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                                                 type="button"
                                             >
-                                                <Link to="/attendance/123">
+                                                <Link to={`/attendance/${a.id}`}>
                                                     <i className="fa fa-info mr-2 text-sm"></i> Info
                                                 </Link>
                                             </button>

@@ -1,13 +1,17 @@
 import React, { useState } from "react";
-import authAxios from "../../utility/authAxios";
+import useAxiosPrivate from "../../api/useAxiosPrivate";
 
-const CardProfile = ({ fullname, division, position, image_url }) => {
+const CardProfile = ({ fullname, division, position, image_url, setResponse }) => {
+    const axiosPrivate = useAxiosPrivate();
+
     const [data, setData] = useState({ fullname: fullname, division: division, position: position, profile: image_url });
-    const [response, setResponse] = useState();
+    const [preview, setPreview] = useState();
 
     // fungsi untuk menampung perubahan file pada form
     const handleChange = (e) => {
         setData({ ...data, images: e.target.files[0] });
+        const imageURL = URL.createObjectURL(e.target.files[0]);
+        setPreview(imageURL);
     };
 
     // fungsi untuk melakukan upload gambar berdasarkan userid yang sedang login
@@ -15,10 +19,10 @@ const CardProfile = ({ fullname, division, position, image_url }) => {
         try {
             const formData = new FormData();
             formData.append("images", data?.images);
-            const result = await authAxios.post("/users/upload", formData);
-            setResponse(result?.data?.data);
+            const result = await axiosPrivate.post("/users/upload", formData);
+            setResponse({ message: result?.data?.data, status: result?.data?.status, statusCode: result?.status });
         } catch (error) {
-            setResponse(error?.message?.data);
+            setResponse({ message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: 400 });
         }
     };
 
@@ -31,7 +35,7 @@ const CardProfile = ({ fullname, division, position, image_url }) => {
                             <div className="relative">
                                 <img
                                     alt="profile"
-                                    src={`http://localhost:5000/images/${data?.profile}`}
+                                    src={preview ? preview : `http://localhost:5000/images/${data?.profile}`}
                                     className="shadow-xl h-44 w-64 rounded-full h-auto align-middle border-none absolute -m-16 -ml-20 lg:-ml-20 mr-8 max-w-150-px"
                                 />
                             </div>
@@ -45,6 +49,7 @@ const CardProfile = ({ fullname, division, position, image_url }) => {
                                         name="images"
                                         type="file"
                                         onChange={handleChange}
+                                        required={true}
                                     ></input>
                                     <button
                                         type="submit"
@@ -55,14 +60,6 @@ const CardProfile = ({ fullname, division, position, image_url }) => {
                                     </button>
                                     {/* <span className="text-sm text-blueGray-400">Friends</span> */}
                                 </div>
-                                {/* <div className="mr-4 p-3 text-center">
-                                    <span className="text-xl font-bold block uppercase tracking-wide text-blueGray-600">10</span>
-                                    <span className="text-sm text-blueGray-400">Photos</span>
-                                </div>
-                                <div className="lg:mr-4 p-3 text-center">
-                                    <span className="text-xl font-bold block uppercase tracking-wide text-blueGray-600">89</span>
-                                    <span className="text-sm text-blueGray-400">Comments</span>
-                                </div> */}
                             </div>
                         </div>
                     </div>

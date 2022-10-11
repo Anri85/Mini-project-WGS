@@ -12,8 +12,7 @@ const selectAttendance = async (id) => {
     if (id) {
         // merancang perintah query
         const order = {
-            text: `SELECT users.id AS user_id, users.fullname, users.division, users.position, attendance.id, attendance.date, attendance.status, attendance.time_in,
-            attendance.time_out FROM attendance JOIN users ON users.id = attendance.user_id WHERE users.id = $1`,
+            text: `SELECT * FROM attendance WHERE user_id = $1`,
             values: [id],
         };
         // mengeksekusi query
@@ -30,10 +29,11 @@ const selectAttendance = async (id) => {
 };
 
 // mencari attendance berdasarkan id
-const findAttendance = async (id, date) => {
+const findAttendance = async (id) => {
     const order = {
-        text: "SELECT fullname, status FROM attendance WHERE id = $1 AND date = $2",
-        values: [id, date],
+        text: `SELECT users.id AS user_id, users.fullname, users.division, users.position, users.role, attendance.id, attendance.date, attendance.status, attendance.time_in,
+        attendance.time_out FROM attendance JOIN users ON users.id = attendance.user_id WHERE attendance.id = $1`,
+        values: [id],
     };
     const result = await pool.query(order);
     if (!result.rowCount) {
@@ -59,13 +59,23 @@ const insertAttendance = async (data) => {
 };
 
 // mengubah attendance sebelumnya
-const updateAttendance = async (id, data) => {
+const updateAttendance = async (id, data, { isUpdate }) => {
     // jika isUpdate bernilai true maka attendance tersebut dirubah oleh seorang admin atau super admin
-    if (data.isUpdate) {
+    if (isUpdate) {
+        // jika data status tidak bernilai sama dengan data prevStatus
+        if (data.status !== data.prevStatus) {
+            // maka artinya status attendance dirubah oleh admin dan akan menggenerate time_out secara otomatis
+            data.time_out = new Date().toLocaleString("id-ID", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true,
+            });
+        }
         // merancang perintah query
         const order = {
-            text: "UPDATE attendance SET status = $1 WHERE id = $3 RETURNING id",
-            values: [data.status, id],
+            text: "UPDATE attendance SET status = $1, time_in = $2, time_out = $3 WHERE id = $4 RETURNING id",
+            values: [data.status, data.time_in, data.time_out, id],
         };
         // mengeksekusi query
         const result = await pool.query(order);

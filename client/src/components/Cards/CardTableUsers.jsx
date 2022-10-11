@@ -8,9 +8,10 @@ import { getUsers } from "../../api/user";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
-import authAxios from "../../utility/authAxios";
+import useAxiosPrivate from "../../api/useAxiosPrivate";
 
 const CardTableUsers = ({ color }) => {
+    const axiosPrivate = useAxiosPrivate();
     const userData = JSON.parse(localStorage.getItem("user"));
     // dispatch untuk memanggil API call (action) pada folder api/user (getUsers)
     const dispatch = useDispatch();
@@ -19,10 +20,11 @@ const CardTableUsers = ({ color }) => {
 
     const [response, setResponse] = useState({ message: "", status: "" });
 
+    // fungsi untuk melakukan penghapusan user (kecuali dirinya sendiri)
     const handleDelete = async (id) => {
         try {
             if (window.confirm("Are you sure will delete this user?") === true) {
-                const result = await authAxios.delete(`/users/delete/${id}`);
+                const result = await axiosPrivate.delete(`/users/delete/${id}`);
                 setResponse({ ...response, message: result?.data?.message, status: result?.data?.status });
                 dispatch(getUsers());
             }
@@ -58,6 +60,14 @@ const CardTableUsers = ({ color }) => {
                                     }
                                 >
                                     Fullname
+                                </th>
+                                <th
+                                    className={
+                                        "px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left " +
+                                        (color === "light" ? "bg-blueGray-50 text-blueGray-500 border-blueGray-100" : "bg-lightBlue-800 text-lightBlue-300 border-lightBlue-700")
+                                    }
+                                >
+                                    Role
                                 </th>
                                 <th
                                     className={
@@ -101,12 +111,13 @@ const CardTableUsers = ({ color }) => {
                                             <img src={`http://localhost:5000/images/${u.image_url}`} className="h-12 w-12 bg-white rounded-full border" alt="..."></img>{" "}
                                             <span className={"ml-3 font-bold " + +(color === "light" ? "text-blueGray-600" : "text-white")}>{u.fullname}</span>
                                         </td>
+                                        <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">{u.role}</td>
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">{u.division}</td>
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">{u.position}</td>
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">Male</td>
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                                             {/* <TableDropdown /> */}
-                                            <Link to="/user/123">
+                                            <Link to={`/user/${u.id}`}>
                                                 <i className="fa fa-info mr-2 bg-sky-400 text-white active:bg-sky-400 px-4 py-2 rounded outline-none"></i>
                                             </Link>
                                             <button

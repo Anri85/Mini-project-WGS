@@ -7,6 +7,8 @@ import Settings from "./views/admin/Settings";
 import Tables from "./views/admin/Tables";
 import CreateUser from "./views/admin/CreateUser";
 import Attendance from "./views/admin/Attendance";
+import DetailAttendance from "./views/admin/DetailAttendance";
+import DetailUser from "./views/admin/DetailUser";
 
 import Admin from "./layouts/Admin";
 import Auth from "./layouts/Auth";
@@ -30,7 +32,8 @@ const App = () => {
                                 <Route path="/attendance" element={<Dashboard />} />
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/create" element={<CreateUser />} />
-                                <Route path="/tables" element={<Tables />} />
+                                <Route path="/users" element={<Tables />} />
+                                <Route path="/user/:id" element={<DetailUser />} />
                             </>
                         ) : (
                             <>
@@ -38,6 +41,7 @@ const App = () => {
                                 <Route path="/settings" element={<Settings />} />
                             </>
                         )}
+                        <Route path="/attendance/:id" element={<DetailAttendance />} />
                         <Route path="*" element={<Navigate to="/" />} />
                     </Route>
                 </Routes>

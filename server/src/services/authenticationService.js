@@ -4,6 +4,7 @@ const pool = new Pool();
 // import exceptions
 const NotFoundError = require("../exceptions/NotFoundError");
 const InvariantError = require("../exceptions/InvariantError");
+const ClientError = require("../exceptions/ClientError");
 
 // menyimpan refresh token kedalam database
 const saveRefreshToken = async (refresh_token) => {
@@ -25,7 +26,7 @@ const findRefreshToken = async (refresh_token) => {
     };
     const result = await pool.query(order);
     if (!result.rowCount) {
-        throw new NotFoundError("Refresh token not found");
+        throw new ClientError("Refresh token not found", 406);
     }
 };
 

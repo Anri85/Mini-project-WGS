@@ -1,25 +1,25 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { useSelector, useDispatch } from "react-redux";
-import { attendanceSelectors } from "../../slice/attendanceSlice";
-
-// import action
-import { getAttendance } from "../../api/attendance";
+import useAxiosPrivate from "../../api/useAxiosPrivate";
 
 const CardAttendance = () => {
-    // dispatch untuk melakukan API call (action) pada folder api/user (getUsers)
-    const dispatch = useDispatch();
-    // useSelector untuk mengambil data state yang tersimpan pada folder slice/userSlice (userSelector)
-    const attendance = useSelector(attendanceSelectors.selectAll);
+    const [attendance, setAttendance] = useState([]);
+    const axiosPrivate = useAxiosPrivate();
 
-    const getAllAttendance = () => {
-        dispatch(getAttendance());
+    // fungsi mengambil attendance list (keseluruhan)
+    const getAllAttendance = async () => {
+        try {
+            const result = await axiosPrivate.get("/attendance/list/");
+            setAttendance(result?.data?.data);
+        } catch (error) {
+            console.log(error?.response?.data);
+        }
     };
 
     useEffect(() => {
-        dispatch(getAttendance());
-    }, [dispatch]);
+        getAllAttendance();
+    }, []);
 
     return (
         <>
@@ -93,7 +93,7 @@ const CardAttendance = () => {
                                                 className="bg-sky-500 text-white active:bg-sky-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                                                 type="button"
                                             >
-                                                <Link to="/attendance/123">
+                                                <Link to={`/attendance/${a.id}`}>
                                                     <i className="fa fa-info mr-2 text-sm"></i> Info
                                                 </Link>
                                             </button>

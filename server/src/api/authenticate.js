@@ -29,7 +29,7 @@ exports.authenticateUser = async (req, res) => {
 exports.updateAccessToken = async (req, res) => {
     try {
         // ambil data request
-        const refresh_token = req.headers["x-refresh-token"];
+        const refresh_token = req.headers.refresh_token;
         // verifikasi apakah refresh token tersimpan dalam database
         await findRefreshToken(refresh_token);
         // jika tersedia, decode refresh token sehingga menghasilkan data user
@@ -48,7 +48,7 @@ exports.updateAccessToken = async (req, res) => {
 };
 
 // ketika user melakukan LOGOUT
-exports.deleteAccessToken = async (req, res) => {
+exports.removeRefreshToken = async (req, res) => {
     try {
         // ambil data request
         const { refresh_token } = req.params;
@@ -58,7 +58,6 @@ exports.deleteAccessToken = async (req, res) => {
         await deleteRefreshToken(refresh_token);
         return res.status(200).json({ message: "Success delete refresh token", status: true });
     } catch (error) {
-        console.log(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });

@@ -172,7 +172,7 @@ const Sidebar = () => {
                                                     "fa fa-plus-square mr-2 text-sm " + (window.location.href.indexOf("/create") !== -1 ? "opacity-75" : "text-blueGray-300")
                                                 }
                                             ></i>{" "}
-                                            Add new user
+                                            Add New User
                                         </Link>
                                     </li>
 
@@ -180,14 +180,14 @@ const Sidebar = () => {
                                         <Link
                                             className={
                                                 "text-xs uppercase py-3 font-bold block " +
-                                                (window.location.href.indexOf("/tables") !== -1
+                                                (window.location.href.indexOf("/users") !== -1
                                                     ? "text-lightBlue-500 hover:text-lightBlue-600"
                                                     : "text-blueGray-700 hover:text-blueGray-500")
                                             }
-                                            to="/tables"
+                                            to="/users"
                                         >
-                                            <i className={"fas fa-table mr-2 text-sm " + (window.location.href.indexOf("/tables") !== -1 ? "opacity-75" : "text-blueGray-300")}></i>{" "}
-                                            Users Table
+                                            <i className={"fas fa-table mr-2 text-sm " + (window.location.href.indexOf("/users") !== -1 ? "opacity-75" : "text-blueGray-300")}></i>{" "}
+                                            Users List
                                         </Link>
                                     </li>
                                 </>

@@ -1,6 +1,6 @@
 import React from "react";
 
-// components
+import images from "../../assets/img/images.jpg";
 
 const CardSocialTraffic = () => {
     return (
@@ -9,7 +9,7 @@ const CardSocialTraffic = () => {
                 <div className="rounded-t mb-0 px-4 py-3 border-0">
                     <div className="flex flex-wrap items-center">
                         <div className="relative w-full px-4 max-w-full flex-grow flex-1">
-                            <h3 className="font-semibold text-base text-blueGray-700">Social traffic</h3>
+                            <h3 className="font-semibold text-base text-blueGray-700">Here your picture</h3>
                         </div>
                         <div className="relative w-full px-4 max-w-full flex-grow flex-1 text-right">
                             <button
@@ -22,8 +22,12 @@ const CardSocialTraffic = () => {
                     </div>
                 </div>
                 <div className="block w-full overflow-x-auto">
-                    {/* Projects table */}
-                    <table className="items-center w-full bg-transparent border-collapse">
+                    <div className="flex flex-wrap justify-center">
+                        <div className="h-72 px-4 mb-4">
+                            <img src={images} alt="..." className="shadow-lg rounded align-middle border-none" height="600" />
+                        </div>
+                    </div>
+                    {/* <table className="items-center w-full bg-transparent border-collapse">
                         <thead className="thead-light">
                             <tr>
                                 <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
@@ -122,7 +126,7 @@ const CardSocialTraffic = () => {
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table> */}
                 </div>
             </div>
         </>

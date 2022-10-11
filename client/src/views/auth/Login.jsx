@@ -16,7 +16,7 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (auth) {
+        if (auth?.username !== "" && auth?.password !== "") {
             try {
                 const result = await axios.post("http://localhost:5000/api/user/authentication", auth);
                 localStorage.setItem("user", JSON.stringify(result?.data?.data));
@@ -26,7 +26,9 @@ const Login = () => {
                 setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status });
             }
         }
+        return false;
     };
+
     return isLogin ? (
         <Navigate to="/" />
     ) : (
@@ -35,8 +37,16 @@ const Login = () => {
                 <div className="flex content-center items-center justify-center h-full">
                     <div className="w-full lg:w-4/12 px-4">
                         {response.status === false && (
-                            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-3 rounded relative" role="alert">
+                            <div className="flex bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-3 justify-center items-center rounded relative" role="alert">
                                 <p className="font-bold text-center">{response.message}</p>
+                                <button
+                                    className="ml-2"
+                                    onClick={() => {
+                                        setResponse({ ...response, message: "", status: "" });
+                                    }}
+                                >
+                                    <i className="fa fa-window-close bg-dark text-xl" aria-hidden="true"></i>
+                                </button>
                             </div>
                         )}
                         <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200 border-0">

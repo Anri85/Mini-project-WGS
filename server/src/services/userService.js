@@ -2,6 +2,7 @@ const { Pool } = require("pg");
 const { nanoid } = require("nanoid");
 const bcrypt = require("bcrypt");
 const pool = new Pool();
+const fs = require("fs");
 
 // import exceptions
 const InvariantError = require("../exceptions/InvariantError");
@@ -94,14 +95,26 @@ const updateUser = async (id, userId, role, data) => {
 };
 
 const changeProfile = async (id, data) => {
+    const order1 = {
+        text: "SELECT image_url FROM users WHERE id = $1",
+        values: [id],
+    };
+    const result1 = await pool.query(order1);
+    if (result1.rows[0].image_url !== "") {
+        fs.unlink(`${process.cwd()}/public/images/${result1.rows[0].image_url}`, (err) => {
+            if (err) {
+                throw new InvariantError("Profile change failed");
+            }
+        });
+    }
     // merancang perintah query
-    const order = {
+    const order2 = {
         text: "UPDATE users SET image_url = $1 WHERE id = $2 RETURNING id",
         values: [data, id],
     };
     // mengeksekusi query
-    const result = await pool.query(order);
-    if (!result.rowCount) {
+    const result2 = await pool.query(order2);
+    if (!result2.rowCount) {
         throw new InvariantError("Profile change failed");
     }
 };
@@ -112,12 +125,25 @@ const deleteUser = async (role, id) => {
     if (role !== "Super admin") {
         throw new AuthorizationError("Forbidden to access this resource");
     }
-    const order = {
+    const order1 = {
+        text: "SELECT image_url FROM users WHERE id = $1",
+        values: [id],
+    };
+    const result1 = await pool.query(order1);
+    if (result1.rowCount) {
+        fs.unlink(`${process.cwd()}/public/images/${result1.rows[0].image_url}`, (err) => {
+            if (err) {
+                throw new InvariantError("User removal failed");
+            }
+        });
+    }
+    // merancang perintah query
+    const order2 = {
         text: "DELETE FROM users WHERE id = $1 RETURNING id",
         values: [id],
     };
-    const result = await pool.query(order);
-    if (!result.rowCount) {
+    const result2 = await pool.query(order2);
+    if (!result2.rowCount) {
         throw new InvariantError("User removal failed");
     }
 };

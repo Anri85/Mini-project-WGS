@@ -11,7 +11,6 @@ exports.getAllUsers = async (req, res) => {
         const users = await selectUsers();
         return res.status(200).json({ message: "Success", status: true, data: users });
     } catch (error) {
-        console.error(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });
@@ -54,7 +53,6 @@ exports.createUser = async (req, res) => {
         const userId = await addUser(req.decoded.role, req.body, req.file.filename);
         return res.status(201).json({ message: "Success", status: true, data: userId });
     } catch (error) {
-        console.error(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });
