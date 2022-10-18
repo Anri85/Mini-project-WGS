@@ -4,6 +4,8 @@ import { useParams } from "react-router-dom";
 import useAxiosPrivate from "../../api/useAxiosPrivate";
 
 const CardDetailAttendance = () => {
+    const userData = JSON.parse(localStorage.getItem("user"));
+
     const axiosPrivate = useAxiosPrivate();
     const { id } = useParams();
 
@@ -25,10 +27,10 @@ const CardDetailAttendance = () => {
         setDetailAttendance({ ...detailAttendance, [e.target.name]: e.target.value, ["prevStatus"]: detailAttendance?.status });
     };
 
-    // fungsi untuk melakukan panggilan api
+    // seorang super admin atau admin dapat mengedit sebuah attendance
     const handleClick = async (e) => {
         e.preventDefault();
-        // jika terdapat prevStatus artinya data sudah pernah dirubah
+        // jika terdapat prevStatus artinya status attendance telah dirubah dan akan menggenerate time_out secara otomatis
         if (window.confirm("This data is true?") === true) {
             if (detailAttendance?.prevStatus) {
                 try {
@@ -58,11 +60,11 @@ const CardDetailAttendance = () => {
                     <div className="rounded-t bg-white mb-0 px-6 py-6">
                         <div className="text-center flex justify-between">
                             <h2 className="text-lg font-large leading-6 text-gray-900">Attendance Information</h2>
-                            <p className="mt-1 max-w-2xl text-sm text-gray-500">User details and attendance.</p>
                             <button
                                 className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 type="button"
                                 onClick={handleClick}
+                                disabled={userData?.role === "Employee" ? true : false}
                             >
                                 Save Change
                             </button>
@@ -71,23 +73,43 @@ const CardDetailAttendance = () => {
                     <div className="flex-auto px-4 lg:px-10 py-10 pt-0">
                         <form>
                             <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">Attendance Information</h6>
+                            <hr className="mt-6 border-b-1 border-blueGray-300 mb-3" />
+                            <div className="w-full lg:w-4/12 px-4">
+                                <div className="relative w-full mb-3">
+                                    <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="status">
+                                        Attendance Image
+                                    </label>
+                                    <img src={`http://localhost:5000/attendance/${detailAttendance?.attendance_image}`} className="rounded-md" alt="attendance image" />
+                                </div>
+                            </div>
                             <div className="flex flex-wrap">
                                 <div className="w-full lg:w-4/12 px-4">
                                     <div className="relative w-full mb-3">
                                         <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="status">
                                             Status
                                         </label>
-                                        <select
-                                            id="status"
-                                            name="status"
-                                            className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                            value={detailAttendance?.status}
-                                            onChange={handleChange}
-                                            disabled={detailAttendance?.status === "Unattended" ? true : false}
-                                        >
-                                            <option defaultValue="Attended">Attended</option>
-                                            <option value="Unattended">Unattended</option>
-                                        </select>
+                                        {userData?.role === "Employee" ? (
+                                            <input
+                                                id="status"
+                                                name="status"
+                                                type="text"
+                                                className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                value={detailAttendance?.status}
+                                                readOnly={userData?.role === "Employee" ? true : false}
+                                            />
+                                        ) : (
+                                            <select
+                                                id="status"
+                                                name="status"
+                                                className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
+                                                value={detailAttendance?.status}
+                                                onChange={handleChange}
+                                                disabled={detailAttendance?.status === "Unattended" ? true : false}
+                                            >
+                                                <option defaultValue="Attended">Attended</option>
+                                                <option value="Unattended">Unattended</option>
+                                            </select>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="w-full lg:w-4/12 px-4">
@@ -102,6 +124,7 @@ const CardDetailAttendance = () => {
                                             className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                             value={detailAttendance?.time_in}
                                             onChange={handleChange}
+                                            readOnly={userData?.role === "Employee" ? true : false}
                                         />
                                     </div>
                                 </div>
@@ -118,6 +141,7 @@ const CardDetailAttendance = () => {
                                                 className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                                 value={detailAttendance?.time_out}
                                                 onChange={handleChange}
+                                                readOnly={userData?.role === "Employee" ? true : false}
                                             />
                                         </div>
                                     </div>

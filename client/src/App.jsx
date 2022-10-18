@@ -26,7 +26,7 @@ const App = () => {
                 <Routes>
                     <Route path="/login" element={<Auth />} />
                     <Route element={<Admin />}>
-                        {isAuth.role === "Super admin" || isAuth.role === "Admin" ? (
+                        {isAuth.role === "Super admin" && (
                             <>
                                 <Route path="/" element={<Attendance />} />
                                 <Route path="/attendance" element={<Dashboard />} />
@@ -35,7 +35,15 @@ const App = () => {
                                 <Route path="/users" element={<Tables />} />
                                 <Route path="/user/:id" element={<DetailUser />} />
                             </>
-                        ) : (
+                        )}
+                        {isAuth.role === "Admin" && (
+                            <>
+                                <Route path="/" element={<Attendance />} />
+                                <Route path="/attendance" element={<Dashboard />} />
+                                <Route path="/settings" element={<Settings />} />
+                            </>
+                        )}
+                        {isAuth.role === "Employee" && (
                             <>
                                 <Route path="/" element={<Attendance />} />
                                 <Route path="/settings" element={<Settings />} />

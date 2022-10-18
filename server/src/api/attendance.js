@@ -1,6 +1,7 @@
 const ClientError = require("../exceptions/ClientError");
 
 const { insertAttendance, selectAttendance, updateAttendance, removeAttendance, findAttendance } = require("../services/attendanceService");
+const { attendanceFileHandler } = require("../utils/attendanceFileHandler");
 
 // mengambil list attendance oleh user
 exports.getAttendanceList = async (req, res) => {
@@ -22,12 +23,9 @@ exports.getAttendanceList = async (req, res) => {
 
 exports.getDetailAttendance = async (req, res) => {
     try {
-        if (req.decoded.role === "Super admin" || req.decoded.role === "Admin") {
-            const { id } = req.params;
-            const detailAttendance = await findAttendance(id);
-            return res.status(200).json({ message: "Success", status: true, data: detailAttendance });
-        }
-        return res.status(403).json({ message: "Forbidden to access this resource", status: false });
+        const { id } = req.params;
+        const detailAttendance = await findAttendance(id);
+        return res.status(200).json({ message: "Success", status: true, data: detailAttendance });
     } catch (error) {
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
@@ -78,7 +76,8 @@ exports.createAttendance = async (req, res) => {
             );
             return res.status(201).json({ message: "Success", status: true, data: { id: attendanceId } });
         }
-        // jika tidak tersedia maka create attendance baru (belum absen pada hari itu)
+        // jika tidak tersedia maka create attendance baru (belum absen pada hari itu) juga proses string base64 dari frontend
+        const filename = attendanceFileHandler(req.body.base64);
         const data = await insertAttendance({
             status: "Attended",
             fullname: req.decoded.fullname,
@@ -90,6 +89,7 @@ exports.createAttendance = async (req, res) => {
                 hour12: true,
             }),
             time_out: "",
+            attendance_image: filename,
             user_id: req.decoded.id,
         });
         return res.status(201).json({ message: "Success", status: true, data });
@@ -117,7 +117,6 @@ exports.editAttendance = async (req, res) => {
         }
         return res.status(403).json({ message: "Forbidden to access this resource", status: false });
     } catch (error) {
-        console.error(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });

@@ -12,7 +12,7 @@ const selectAttendance = async (id) => {
     if (id) {
         // merancang perintah query
         const order = {
-            text: `SELECT * FROM attendance WHERE user_id = $1`,
+            text: `SELECT * FROM attendance WHERE user_id = $1 ORDER BY date DESC`,
             values: [id],
         };
         // mengeksekusi query
@@ -23,7 +23,7 @@ const selectAttendance = async (id) => {
         return result.rows;
     } else {
         // jika tidak terdapat id maka ambil seluruh data attendance
-        const result = await pool.query("SELECT * FROM attendance");
+        const result = await pool.query("SELECT * FROM attendance ORDER BY date DESC");
         return result.rows;
     }
 };
@@ -32,7 +32,7 @@ const selectAttendance = async (id) => {
 const findAttendance = async (id) => {
     const order = {
         text: `SELECT users.id AS user_id, users.fullname, users.division, users.position, users.role, attendance.id, attendance.date, attendance.status, attendance.time_in,
-        attendance.time_out FROM attendance JOIN users ON users.id = attendance.user_id WHERE attendance.id = $1`,
+        attendance.time_out, attendance.attendance_image FROM attendance JOIN users ON users.id = attendance.user_id WHERE attendance.id = $1`,
         values: [id],
     };
     const result = await pool.query(order);
@@ -47,8 +47,8 @@ const insertAttendance = async (data) => {
     const id = `attendance-${nanoid(16)}`;
     // merancang perintah query
     const order = {
-        text: "INSERT INTO attendance VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-        values: [id, data.fullname, data.date, data.status, data.time_in, data.time_out, data.user_id],
+        text: "INSERT INTO attendance VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+        values: [id, data.fullname, data.date, data.status, data.time_in, data.time_out, data.attendance_image, data.user_id],
     };
     // mengeksekusi query
     const result = await pool.query(order);
@@ -71,6 +71,9 @@ const updateAttendance = async (id, data, { isUpdate }) => {
                 second: "2-digit",
                 hour12: true,
             });
+        }
+        if (data.time_out === "") {
+            data.status = "Attended";
         }
         // merancang perintah query
         const order = {

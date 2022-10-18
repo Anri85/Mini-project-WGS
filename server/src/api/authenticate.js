@@ -37,7 +37,6 @@ exports.updateAccessToken = async (req, res) => {
         const access_token = tokenManager.generateAccessToken(userData);
         return res.status(201).json({ message: "Success generate new access token", access_token });
     } catch (error) {
-        console.log(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ status: false, message: error.message });

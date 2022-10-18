@@ -13,14 +13,14 @@ const AuthorizationError = require("../exceptions/AuthorizationError");
 // select user
 const selectUsers = async () => {
     // jika tidak terdapat id maka ambil semua data user
-    const result = await pool.query("SELECT id, fullname, role, division, position, image_url FROM users");
+    const result = await pool.query("SELECT id, fullname, role, division, position, gender, image_url FROM users");
     return result.rows;
 };
 
 const selectSingleUser = async (id) => {
     // merancang perintah query
     const order = {
-        text: "SELECT id, fullname, role, division, position, image_url, username FROM users WHERE id = $1",
+        text: "SELECT id, fullname, role, division, position, gender, image_url, username FROM users WHERE id = $1",
         values: [id],
     };
     // mengeksekusi query
@@ -31,8 +31,29 @@ const selectSingleUser = async (id) => {
     return result.rows[0];
 };
 
+const selectSingleAnotherUser = async (id) => {
+    // merancang perintah query
+    const order1 = {
+        text: "SELECT username, fullname, role, division, position, gender, image_url FROM users WHERE id = $1",
+        values: [id],
+    };
+    const order2 = {
+        text: "SELECT id, date, status, time_in, time_out FROM attendance WHERE user_id = $1",
+        values: [id],
+    };
+    // mengeksekusi query
+    const result1 = await pool.query(order1);
+    const result2 = await pool.query(order2);
+
+    const data = { ...result1.rows[0], attendance: result2.rows };
+    if (!result1.rowCount) {
+        throw new NotFoundError("User not found");
+    }
+    return data;
+};
+
 // tambah seorang user
-const addUser = async (userRole, { fullname, username, password, role, division, position }, image_url) => {
+const addUser = async (userRole, { fullname, username, password, role, division, position, gender }, image_url) => {
     // cek role user yang melakukan create
     if (userRole !== "Super admin") {
         throw new AuthorizationError("Forbidden to access this resource");
@@ -47,8 +68,8 @@ const addUser = async (userRole, { fullname, username, password, role, division,
     const hashPassword = await bcrypt.hash(password, 10);
     // merancang perintah query
     const order = {
-        text: "INSERT INTO users VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
-        values: [id, fullname, username, hashPassword, role, division, position, image_url],
+        text: "INSERT INTO users VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
+        values: [id, fullname, username, hashPassword, role, division, position, gender, image_url],
     };
     // mengeksekusi query
     const result = await pool.query(order);
@@ -62,17 +83,17 @@ const addUser = async (userRole, { fullname, username, password, role, division,
 const updateUser = async (id, userId, role, data) => {
     let order;
     // cek role user yang melakukan update
-    if (role === "Super admin") {
+    if (role === "Super admin" || role === "Admin") {
         if (id) {
             // merancang perintah query
             order = {
-                text: "UPDATE users SET fullname = $1, role = $2, division = $3, position = $4 WHERE id = $5 RETURNING id",
-                values: [data.fullname, data.role, data.division, data.position, id],
+                text: "UPDATE users SET fullname = $1, role = $2, division = $3, position = $4, gender = $5 WHERE id = $6 RETURNING id",
+                values: [data.fullname, data.role, data.division, data.position, data.gender, id],
             };
         } else {
             order = {
-                text: "UPDATE users SET fullname = $1, role = $2, division = $3, position = $4 WHERE id = $5 RETURNING id",
-                values: [data.fullname, data.role, data.division, data.position, userId],
+                text: "UPDATE users SET fullname = $1, role = $2, division = $3, position = $4, gender = $5 WHERE id = $6 RETURNING id",
+                values: [data.fullname, data.role, data.division, data.position, data.gender, userId],
             };
         }
         // mengeksekusi query
@@ -168,4 +189,4 @@ const verifyUser = async ({ username, password }) => {
     return { id: result.rows[0].id, fullname: result.rows[0].fullname, role: result.rows[0].role };
 };
 
-module.exports = { addUser, selectUsers, selectSingleUser, updateUser, deleteUser, verifyUser, changeProfile };
+module.exports = { addUser, selectUsers, selectSingleUser, selectSingleAnotherUser, updateUser, deleteUser, verifyUser, changeProfile };

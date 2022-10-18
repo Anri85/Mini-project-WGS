@@ -54,8 +54,8 @@ const Sidebar = () => {
                     <ul className="md:hidden items-center flex flex-wrap list-none">
                         <li className="inline-block relative">
                             <div className="items-center flex">
-                                <span className="w-12 h-12 text-sm text-white bg-blueGray-200 inline-flex items-center justify-center rounded-full">
-                                    <img alt="..." className="w-full rounded-full align-middle border-none shadow-lg" src={image} />
+                                <span className="w-14 h-14 inline-flex items-center justify-center">
+                                    <img alt="logo" className="w-full align-middle border-none shadow-lg" src="https://www.wgs.co.id/assets/logo_wgs_fullBlack.svg" />
                                 </span>
                             </div>
                         </li>
@@ -104,7 +104,7 @@ const Sidebar = () => {
                         {/* Navigation */}
 
                         <ul className="md:flex-col md:min-w-full flex flex-col list-none">
-                            {isAuth.role === "Super admin" || isAuth.role === "Admin" ? (
+                            {isAuth.role === "Super admin" && (
                                 <>
                                     <li className="items-center">
                                         <Link
@@ -191,7 +191,62 @@ const Sidebar = () => {
                                         </Link>
                                     </li>
                                 </>
-                            ) : (
+                            )}
+                            {isAuth.role === "Admin" && (
+                                <>
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/"
+                                        >
+                                            <i className={"fas fa-tv mr-2 text-sm " + (window.location.href.indexOf("/") !== -1 ? "opacity-75" : "text-blueGray-300")}></i>{" "}
+                                            Dashboard
+                                        </Link>
+                                    </li>
+
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/attendance") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/attendance"
+                                        >
+                                            <i
+                                                className={
+                                                    "fa fa-address-book mr-2 text-sm " + (window.location.href.indexOf("/attendance") !== -1 ? "opacity-75" : "text-blueGray-300")
+                                                }
+                                            ></i>{" "}
+                                            Attendance List
+                                        </Link>
+                                    </li>
+
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/settings") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/settings"
+                                        >
+                                            <i
+                                                className={"fas fa-tools mr-2 text-sm " + (window.location.href.indexOf("/settings") !== -1 ? "opacity-75" : "text-blueGray-300")}
+                                            ></i>{" "}
+                                            Settings
+                                        </Link>
+                                    </li>
+                                </>
+                            )}
+                            {isAuth.role === "Employee" && (
                                 <>
                                     <li className="items-center">
                                         <Link

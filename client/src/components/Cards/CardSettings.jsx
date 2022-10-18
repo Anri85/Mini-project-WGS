@@ -103,7 +103,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender, se
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={newData?.position}
                                         onChange={handleChange}
-                                        disabled={newData?.role === "Employee" ? true : false}
+                                        disabled={newData?.role === "Employee" || newData?.role === "Admin" ? true : false}
                                     >
                                         <option defaultValue="Employee">Employee</option>
                                         <option value="Manager">Manager</option>
@@ -122,7 +122,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender, se
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={newData?.division}
                                         onChange={handleChange}
-                                        disabled={newData?.role === "Employee" ? true : false}
+                                        disabled={newData?.role === "Employee" || newData?.role === "Admin" ? true : false}
                                     >
                                         <option defaultValue="Employee">Marketing</option>
                                         <option value="HR">HR</option>
@@ -142,7 +142,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender, se
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={newData?.role}
                                         onChange={handleChange}
-                                        disabled={newData?.role === "Employee" ? true : false}
+                                        disabled={newData?.role === "Employee" || newData?.role === "Admin" ? true : false}
                                     >
                                         <option defaultValue="Employee">Employee</option>
                                         <option value="Admin">Admin</option>
@@ -161,7 +161,7 @@ const CardSettings = ({ fullname, username, position, division, role, gender, se
                                         className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         value={newData?.gender}
                                         onChange={handleChange}
-                                        disabled={newData?.role === "Employee" ? true : false}
+                                        disabled={newData?.role === "Employee" || newData?.role === "Admin" ? true : false}
                                     >
                                         <option defaultValue="Male">Male</option>
                                         <option value="Female">Female</option>

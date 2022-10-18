@@ -1,15 +1,16 @@
 const ClientError = require("../exceptions/ClientError");
 
-const { addUser, selectUsers, selectSingleUser, deleteUser, updateUser, changeProfile } = require("../services/userService");
+const { addUser, selectUsers, selectSingleUser, selectSingleAnotherUser, deleteUser, updateUser, changeProfile } = require("../services/userService");
 
 exports.getAllUsers = async (req, res) => {
     try {
-        // jika user yang mengakses bukan super admin maka akses tersebut dilarang
-        if (req.decoded.role !== "Super admin") {
-            return res.status(403).json({ message: "Forbidden to access this resource", status: false });
+        // jika user yang mengakses adalah super admin atau admin maka akses tersebut diberikan
+        if (req.decoded.role === "Super admin" || req.decoded.role === "Admin") {
+            const users = await selectUsers();
+            return res.status(200).json({ message: "Success", status: true, data: users });
         }
-        const users = await selectUsers();
-        return res.status(200).json({ message: "Success", status: true, data: users });
+        // jika user yang mengakses bukan super admin atau admin maka akses dilarang
+        return res.status(403).json({ message: "Forbidden to access this resource", status: false });
     } catch (error) {
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
@@ -26,7 +27,7 @@ exports.getSingleUser = async (req, res) => {
         const userId = req.decoded.id;
         // jika terdapat parameter id maka cari user berdasarkan id tersebut
         if (id) {
-            const user = await selectSingleUser(id);
+            const user = await selectSingleAnotherUser(id);
             return res.status(200).json({ message: "Success", status: true, data: user });
         } else {
             // jika tidak ada maka cari user berdasarkan user yang sedang login
@@ -64,7 +65,7 @@ exports.createUser = async (req, res) => {
 
 exports.editUser = async (req, res) => {
     try {
-        if (req.decoded.role === "Super admin") {
+        if (req.decoded.role === "Super admin" || req.decoded.role === "Admin") {
             // jika user yang melakukan update adalah super admin
             const { fullname, role, division, position, gender } = req.body;
             // ambil id user lain
@@ -78,7 +79,6 @@ exports.editUser = async (req, res) => {
         await updateUser(req.decoded.id, req.decoded.role, image_url);
         return res.status(200).json({ message: "Success", status: true });
     } catch (error) {
-        console.error(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });
@@ -99,7 +99,6 @@ exports.removeUser = async (req, res) => {
         await deleteUser(req.decoded.role, id);
         return res.status(200).json({ message: "Success", status: true });
     } catch (error) {
-        console.error(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });
@@ -121,7 +120,6 @@ exports.uploadImage = async (req, res) => {
         }
         return res.status(400).json({ message: "No file uploaded", status: false });
     } catch (error) {
-        console.error(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });

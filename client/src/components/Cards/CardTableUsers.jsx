@@ -1,24 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { userSelectors } from "../../slice/userSlice";
-
-// import action
-import { getUsers } from "../../api/user";
+import React from "react";
 
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
 import useAxiosPrivate from "../../api/useAxiosPrivate";
 
-const CardTableUsers = ({ color }) => {
+const CardTableUsers = ({ color, users, response, setResponse, getAllUsers }) => {
     const axiosPrivate = useAxiosPrivate();
     const userData = JSON.parse(localStorage.getItem("user"));
-    // dispatch untuk memanggil API call (action) pada folder api/user (getUsers)
-    const dispatch = useDispatch();
-    // useSelector untuk mengambil data state yang tersimpan pada folder slice/userSlice (userSelector)
-    const users = useSelector(userSelectors.selectAll);
-
-    const [response, setResponse] = useState({ message: "", status: "" });
 
     // fungsi untuk melakukan penghapusan user (kecuali dirinya sendiri)
     const handleDelete = async (id) => {
@@ -26,7 +15,7 @@ const CardTableUsers = ({ color }) => {
             if (window.confirm("Are you sure will delete this user?") === true) {
                 const result = await axiosPrivate.delete(`/users/delete/${id}`);
                 setResponse({ ...response, message: result?.data?.message, status: result?.data?.status });
-                dispatch(getUsers());
+                getAllUsers();
             }
             return false;
         } catch (error) {
@@ -34,13 +23,9 @@ const CardTableUsers = ({ color }) => {
         }
     };
 
-    useEffect(() => {
-        dispatch(getUsers());
-    }, [dispatch]);
-
     return (
         <>
-            <div className={"relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded " + (color === "light" ? "bg-white" : "bg-lightBlue-900 text-white")}>
+            <div className={"relative flex flex-col min-w-0 break-words w-full mb-2 shadow-lg rounded " + (color === "light" ? "bg-white" : "bg-lightBlue-900 text-white")}>
                 <div className="rounded-t mb-0 px-4 py-3 border-0">
                     <div className="flex flex-wrap items-center">
                         <div className="relative w-full px-4 max-w-full flex-grow flex-1">
@@ -114,9 +99,8 @@ const CardTableUsers = ({ color }) => {
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">{u.role}</td>
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">{u.division}</td>
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">{u.position}</td>
-                                        <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">Male</td>
+                                        <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">{u.gender}</td>
                                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                                            {/* <TableDropdown /> */}
                                             <Link to={`/user/${u.id}`}>
                                                 <i className="fa fa-info mr-2 bg-sky-400 text-white active:bg-sky-400 px-4 py-2 rounded outline-none"></i>
                                             </Link>

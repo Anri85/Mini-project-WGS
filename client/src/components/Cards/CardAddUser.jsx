@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 
 import authAxios from "../../utility/authAxios";
+import useAxiosPrivate from "../../api/useAxiosPrivate";
 
 const CardAddUser = () => {
+    const axiosPrivate = useAxiosPrivate();
+
     // buat state untuk mennyimpan data type input, data type select dan data type file
     const [newUserData, setNewUserData] = useState({
         fullname: "",
@@ -34,17 +37,19 @@ const CardAddUser = () => {
     const handleClick = async (e) => {
         e.preventDefault();
         if (newUserData.fullname !== "" && newUserData.username !== "" && newUserData.password !== "" && newUserData.images !== "") {
-            // karena pengiriman data berbarengan dengan mengirim file maka data harus dirubah menjadi format form data
-            const formData = new FormData();
-            // lakukan looping untuk append kedalam formdata berdasarkan key dan value dari state newUserData
-            for (let key in newUserData) {
-                formData.append(key.toString(), newUserData[key]);
-            }
-            try {
-                const result = await authAxios.post("/users/create", formData);
-                setResponse({ ...response, message: result?.data?.message, status: result?.data?.status, statusCode: result?.status });
-            } catch (error) {
-                setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: error?.response?.status });
+            if (window.confirm("This data is true?") === true) {
+                // karena pengiriman data berbarengan dengan mengirim file maka data harus dirubah menjadi format form data
+                const formData = new FormData();
+                // lakukan looping untuk append kedalam formdata berdasarkan key dan value dari state newUserData
+                for (let key in newUserData) {
+                    formData.append(key.toString(), newUserData[key]);
+                }
+                try {
+                    const result = await axiosPrivate.post("/users/create", formData);
+                    setResponse({ ...response, message: result?.data?.message, status: result?.data?.status, statusCode: result?.status });
+                } catch (error) {
+                    setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: error?.response?.status });
+                }
             }
         } else {
             setResponse({ message: "Please fill all the forms correctly", status: false, statusCode: 400 });
@@ -129,16 +134,6 @@ const CardAddUser = () => {
                                     </div>
                                 </div>
                             </div>
-                            {/* <div className="w-full lg:w-6/12 px-4">
-                                <div className="relative w-full mb-3">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700">Photo</label>
-                                        <div className="mt-1 flex items-center">
-                                            
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> */}
                             <div className="w-full lg:w-6/12 px-4">
                                 <div className="relative w-full mb-3">
                                     <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="grid-password">

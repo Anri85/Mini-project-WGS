@@ -1,54 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 import useAxiosPrivate from "../../api/useAxiosPrivate";
 
 // components
-// import Modal from "../Modal/Modal";
+import CardModal from "./CardModal";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 
-const CardEmployeeAttendance = () => {
-    const [myAttendance, setMyAttendance] = useState([]);
-    const [response, setResponse] = useState({ message: "", status: "", statusCode: "" });
-
+const CardEmployeeAttendance = ({ myAttendance, isAttendToday, response, setResponse, getMyAttendance }) => {
     const axiosPrivate = useAxiosPrivate();
-
-    // const [openModal, setOpenModal] = useState(false);
-    const [isAttendToday, setIsAttendToday] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
 
     // fungsi untuk membuat attendance
     const createAttendance = async (attendanceId) => {
-        try {
-            await axiosPrivate.post(`/attendance/create/${attendanceId}`);
-            getMyAttendance(userData?.id);
-        } catch (error) {
-            setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: error?.response?.status });
+        if (attendanceId === "") {
+            setOpenModal(true);
+        } else {
+            try {
+                await axiosPrivate.post(`/attendance/create/${attendanceId}`);
+                getMyAttendance(userData?.id);
+            } catch (error) {
+                setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: error?.response?.status });
+            }
         }
     };
-
-    // fungsi mengambil attendance list (berdasarkan userId)
-    const getMyAttendance = async (userId) => {
-        try {
-            const result = await axiosPrivate.get(`/attendance/list/my/${userId}`);
-            // fungsi untuk mengecek apakah sudah tedapat attendance pada hari tersebut
-            const isAttended = result?.data?.data.filter((a) => a.user_id === userData.id && a.date === new Date().toISOString().split("T")[0]);
-            // jika sudah tedapat attendance maka user tidak dapat membuat attendance
-            isAttended.length > 0 ? setIsAttendToday(true) : setIsAttendToday(false);
-            // set attendance list dalam state
-            setMyAttendance(result?.data?.data);
-        } catch (error) {
-            setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: error?.response?.status });
-        }
-    };
-
-    useEffect(() => {
-        getMyAttendance(userData?.id);
-    }, []);
 
     return (
         <>
-            <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
+            <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-2 shadow-lg rounded">
                 {response?.statusCode === 404 && (
                     <>
                         <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none">
@@ -179,11 +159,11 @@ const CardEmployeeAttendance = () => {
                     </table>
                 </div>
             </div>
-            {/* {openModal && (
+            {openModal && (
                 <>
-                    <Modal setOpenModal={setOpenModal} />
+                    <CardModal setOpenModal={setOpenModal} />
                 </>
-            )} */}
+            )}
         </>
     );
 };

@@ -48,18 +48,6 @@ const HeaderStats = () => {
                                     statIconColor="bg-pink-500"
                                 />
                             </div>
-                            <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
-                                <CardStats
-                                    statSubtitle="PERFORMANCE"
-                                    statTitle="49,65%"
-                                    statArrow="up"
-                                    statPercent="12"
-                                    statPercentColor="text-emerald-500"
-                                    statDescripiron="Since last month"
-                                    statIconName="fas fa-percent"
-                                    statIconColor="bg-lightBlue-500"
-                                />
-                            </div>
                         </div>
                     </div>
                 </div>

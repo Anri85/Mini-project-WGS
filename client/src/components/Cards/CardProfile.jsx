@@ -20,7 +20,7 @@ const CardProfile = ({ fullname, division, position, image_url, setResponse }) =
             const formData = new FormData();
             formData.append("images", data?.images);
             const result = await axiosPrivate.post("/users/upload", formData);
-            setResponse({ message: result?.data?.data, status: result?.data?.status, statusCode: result?.status });
+            setResponse({ message: result?.data?.message, status: result?.data?.status, statusCode: result?.status });
         } catch (error) {
             setResponse({ message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: 400 });
         }
@@ -65,9 +65,6 @@ const CardProfile = ({ fullname, division, position, image_url, setResponse }) =
                     </div>
                     <div className="text-center mb-10">
                         <h3 className="text-xl font-semibold leading-normal mb-2 text-blueGray-700 mb-2">{data?.fullname}</h3>
-                        {/* <div className="text-sm leading-normal mt-0 mb-2 text-blueGray-400 font-bold uppercase">
-                            <i className="fas fa-map-marker-alt mr-2 text-lg text-blueGray-400"></i> Los Angeles, California
-                        </div> */}
                         <div className="mb-2 text-blueGray-600 mt-10">
                             <i className="fas fa-briefcase mr-2 text-lg text-blueGray-400"></i>
                             {data?.position} - At Walden Global Services
@@ -77,19 +74,6 @@ const CardProfile = ({ fullname, division, position, image_url, setResponse }) =
                             {data?.division} - At Walden Global Services
                         </div>
                     </div>
-                    {/* <div className="mt-10 py-10 border-t border-blueGray-200 text-center">
-                        <div className="flex flex-wrap justify-center">
-                            <div className="w-full lg:w-9/12 px-4">
-                                <p className="mb-4 text-lg leading-relaxed text-blueGray-700">
-                                    An artist of considerable range, Jenna the name taken by Melbourne-raised, Brooklyn-based Nick Murphy writes, performs and records all of his
-                                    own music, giving it a warm, intimate feel with a solid groove structure. An artist of considerable range.
-                                </p>
-                                <a href="#pablo" className="font-normal text-lightBlue-500" onClick={(e) => e.preventDefault()}>
-                                    Show more
-                                </a>
-                            </div>
-                        </div>
-                    </div> */}
                 </div>
             </div>
         </>

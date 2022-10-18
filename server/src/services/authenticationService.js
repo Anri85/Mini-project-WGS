@@ -2,7 +2,6 @@ const { Pool } = require("pg");
 const pool = new Pool();
 
 // import exceptions
-const NotFoundError = require("../exceptions/NotFoundError");
 const InvariantError = require("../exceptions/InvariantError");
 const ClientError = require("../exceptions/ClientError");
 
