@@ -30,27 +30,6 @@ const Admin = () => {
     ) : (
         <Navigate to="/login" />
     );
-
-    // useEffect(() => {
-    //     // cek jika localstorage tersedia maka artinya user telah login
-    //     const isLogin = JSON.parse(localStorage.getItem("user"));
-    //     // jika localstorage tidak tersedia maka kembalikan user pada halaman login
-    //     if (!isLogin) return navigate("/login");
-    // }, []);
-
-    // return (
-    //     <>
-    //         <Sidebar />
-    //         <div className="relative md:ml-64 bg-blueGray-100">
-    //             <AdminNavbar />
-    //             <HeaderStats />
-    //             <div className="px-4 md:px-10 mx-auto w-full -m-24">
-    //                 <Outlet />
-    //                 <FooterAdmin />
-    //             </div>
-    //         </div>
-    //     </>
-    // );
 };
 
 export default Admin;

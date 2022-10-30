@@ -12,7 +12,7 @@ const selectAttendance = async (id) => {
     if (id) {
         // merancang perintah query
         const order = {
-            text: `SELECT * FROM attendance WHERE user_id = $1 ORDER BY date DESC`,
+            text: `SELECT * FROM attendance WHERE user_id = $1 ORDER BY created_at DESC`,
             values: [id],
         };
         // mengeksekusi query
@@ -23,7 +23,7 @@ const selectAttendance = async (id) => {
         return result.rows;
     } else {
         // jika tidak terdapat id maka ambil seluruh data attendance
-        const result = await pool.query("SELECT * FROM attendance ORDER BY date DESC");
+        const result = await pool.query("SELECT * FROM attendance ORDER BY created_at DESC");
         return result.rows;
     }
 };
@@ -42,13 +42,22 @@ const findAttendance = async (id) => {
     return result.rows[0];
 };
 
+const filterAttendance = async (arr) => {
+    const order = {
+        text: `SELECT * FROM attendance WHERE ${arr[0]} = $1 ORDER BY created_at DESC`,
+        values: [arr[1]],
+    };
+    const result = await pool.query(order);
+    return result.rows;
+};
+
 // membuat attendance
 const insertAttendance = async (data) => {
     const id = `attendance-${nanoid(16)}`;
     // merancang perintah query
     const order = {
-        text: "INSERT INTO attendance VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-        values: [id, data.fullname, data.date, data.status, data.time_in, data.time_out, data.attendance_image, data.user_id],
+        text: "INSERT INTO attendance VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+        values: [id, data.fullname, data.status, data.time_in, data.time_out, data.attendance_image, data.user_id],
     };
     // mengeksekusi query
     const result = await pool.query(order);
@@ -118,4 +127,12 @@ const removeAttendance = async (id, role) => {
     throw new AuthorizationError("Forbidden to access this resource");
 };
 
-module.exports = { selectAttendance, insertAttendance, updateAttendance, findAttendance, removeAttendance };
+const getAttendanceStatistic = async () => {
+    const numberOfUsers = await pool.query("SELECT COUNT(id) FROM users");
+    const numberOfAbsences = await pool.query("SELECT COUNT(id) FROM attendance WHERE date = CURRENT_DATE");
+    const numberOfCompleted = await pool.query("SELECT COUNT(id) FROM attendance WHERE time_out != '' AND date = CURRENT_DATE");
+
+    return { users: numberOfUsers.rows[0].count, absences: numberOfAbsences.rows[0].count, completed: numberOfCompleted.rows[0].count };
+};
+
+module.exports = { selectAttendance, insertAttendance, updateAttendance, findAttendance, removeAttendance, getAttendanceStatistic, filterAttendance };

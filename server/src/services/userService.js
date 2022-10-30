@@ -11,9 +11,14 @@ const AuthenticationError = require("../exceptions/AuthenticationError");
 const AuthorizationError = require("../exceptions/AuthorizationError");
 
 // select user
-const selectUsers = async () => {
+const selectUsers = async (fullname) => {
+    let result;
+    if (fullname) {
+        result = await pool.query(`SELECT id, fullname, role, division, position, gender, image_url FROM users WHERE lower(fullname) LIKE '%${fullname.toLowerCase()}%'`);
+        return result.rows;
+    }
     // jika tidak terdapat id maka ambil semua data user
-    const result = await pool.query("SELECT id, fullname, role, division, position, gender, image_url FROM users");
+    result = await pool.query("SELECT id, fullname, role, division, position, gender, image_url FROM users");
     return result.rows;
 };
 
@@ -140,30 +145,19 @@ const changeProfile = async (id, data) => {
     }
 };
 
-// hapus seorang user
-const deleteUser = async (role, id) => {
-    // cek role user yang melakukan delete
-    if (role !== "Super admin") {
-        throw new AuthorizationError("Forbidden to access this resource");
-    }
-    const order1 = {
-        text: "SELECT image_url FROM users WHERE id = $1",
-        values: [id],
-    };
-    const result1 = await pool.query(order1);
+// hapus seorang user ataupun beberapa user
+const deleteUser = async (id) => {
+    const result1 = await pool.query(`SELECT image_url FROM users WHERE id = ANY('{${id}}'::text[])`);
     if (result1.rowCount) {
-        fs.unlink(`${process.cwd()}/public/images/${result1.rows[0].image_url}`, (err) => {
-            if (err) {
-                throw new InvariantError("User removal failed");
-            }
+        result1.rows.forEach((url) => {
+            fs.unlink(`${process.cwd()}/public/images/${url.image_url}`, (err) => {
+                if (err) {
+                    throw new InvariantError("User removal failed");
+                }
+            });
         });
     }
-    // merancang perintah query
-    const order2 = {
-        text: "DELETE FROM users WHERE id = $1 RETURNING id",
-        values: [id],
-    };
-    const result2 = await pool.query(order2);
+    const result2 = await pool.query(`DELETE FROM users WHERE id = ANY('{${id}}'::text[]) RETURNING id`);
     if (!result2.rowCount) {
         throw new InvariantError("User removal failed");
     }

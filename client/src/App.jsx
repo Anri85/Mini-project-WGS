@@ -9,7 +9,7 @@ import CreateUser from "./views/admin/CreateUser";
 import Attendance from "./views/admin/Attendance";
 import DetailAttendance from "./views/admin/DetailAttendance";
 import DetailUser from "./views/admin/DetailUser";
-
+import Log from "./views/admin/Log";
 import Admin from "./layouts/Admin";
 import Auth from "./layouts/Auth";
 
@@ -34,6 +34,7 @@ const App = () => {
                                 <Route path="/create" element={<CreateUser />} />
                                 <Route path="/users" element={<Tables />} />
                                 <Route path="/user/:id" element={<DetailUser />} />
+                                <Route path="/logs" element={<Log />} />
                             </>
                         )}
                         {isAuth.role === "Admin" && (
@@ -41,6 +42,7 @@ const App = () => {
                                 <Route path="/" element={<Attendance />} />
                                 <Route path="/attendance" element={<Dashboard />} />
                                 <Route path="/settings" element={<Settings />} />
+                                <Route path="/logs" element={<Log />} />
                             </>
                         )}
                         {isAuth.role === "Employee" && (

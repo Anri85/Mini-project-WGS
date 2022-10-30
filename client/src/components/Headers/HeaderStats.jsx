@@ -1,53 +1,57 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import useAxiosPrivate from "../../api/useAxiosPrivate";
 
 // components
 import CardStats from "../Cards/CardStats";
+import { NETWORK_IP } from "../../utility/utils";
+
+const useAuth = () => {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    return userData === null ? false : userData;
+};
 
 const HeaderStats = () => {
+    const axiosPrivate = useAxiosPrivate();
+    const isAuth = useAuth();
+
+    const [facts, setFacts] = useState([]);
+    const [stats, setStats] = useState();
+
+    const callAPI = async () => {
+        try {
+            if (isAuth?.role === "Employee") {
+                const result = await axios.get("https://api.api-ninjas.com/v1/facts?limit=1", { headers: { "X-Api-Key": "0tYWK1N4dt7EPbuGCQBN+A==8nrlDTPUBEFcgGM5" } });
+                setFacts(result?.data);
+            } else {
+                const result = await axiosPrivate.get(`${NETWORK_IP}/api/attendance/analysis`);
+                setStats(result?.data);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        callAPI();
+    }, []);
+
     return (
         <>
-            {/* Header */}
             <div className="relative bg-lightBlue-600 md:pt-32 pb-32 pt-12">
                 <div className="px-4 md:px-10 mx-auto w-full">
                     <div>
-                        {/* Card stats */}
                         <div className="flex flex-wrap">
-                            <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
-                                <CardStats
-                                    statSubtitle="TRAFFIC"
-                                    statTitle="350,897"
-                                    statArrow="up"
-                                    statPercent="3.48"
-                                    statPercentColor="text-emerald-500"
-                                    statDescripiron="Since last month"
-                                    statIconName="far fa-chart-bar"
-                                    statIconColor="bg-red-500"
-                                />
-                            </div>
-                            <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
-                                <CardStats
-                                    statSubtitle="NEW USERS"
-                                    statTitle="2,356"
-                                    statArrow="down"
-                                    statPercent="3.48"
-                                    statPercentColor="text-red-500"
-                                    statDescripiron="Since last week"
-                                    statIconName="fas fa-chart-pie"
-                                    statIconColor="bg-orange-500"
-                                />
-                            </div>
-                            <div className="w-full lg:w-6/12 xl:w-3/12 px-4">
-                                <CardStats
-                                    statSubtitle="SALES"
-                                    statTitle="924"
-                                    statArrow="down"
-                                    statPercent="1.10"
-                                    statPercentColor="text-orange-500"
-                                    statDescripiron="Since yesterday"
-                                    statIconName="fas fa-users"
-                                    statIconColor="bg-pink-500"
-                                />
-                            </div>
+                            {isAuth?.role === "Employee" && (
+                                <div className="w-full lg:w-8/12 xl:w-6/12 px-4">
+                                    <CardStats facts={facts} fullname={isAuth?.fullname} />
+                                </div>
+                            )}
+                            {stats && (
+                                <>
+                                    <CardStats stats={stats} />
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

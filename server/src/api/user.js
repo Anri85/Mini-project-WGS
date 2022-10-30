@@ -4,9 +4,10 @@ const { addUser, selectUsers, selectSingleUser, selectSingleAnotherUser, deleteU
 
 exports.getAllUsers = async (req, res) => {
     try {
+        const { fullname } = req.query;
         // jika user yang mengakses adalah super admin atau admin maka akses tersebut diberikan
         if (req.decoded.role === "Super admin" || req.decoded.role === "Admin") {
-            const users = await selectUsers();
+            const users = await selectUsers(fullname);
             return res.status(200).json({ message: "Success", status: true, data: users });
         }
         // jika user yang mengakses bukan super admin atau admin maka akses dilarang
@@ -96,9 +97,10 @@ exports.removeUser = async (req, res) => {
         }
         // jika user merupakan super admin maka diperbolehkan mengakses resource dan menghapus user
         const { id } = req.params;
-        await deleteUser(req.decoded.role, id);
+        await deleteUser(id);
         return res.status(200).json({ message: "Success", status: true });
     } catch (error) {
+        console.log(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });

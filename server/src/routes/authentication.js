@@ -4,6 +4,6 @@ const { authenticateUser, updateAccessToken, removeRefreshToken } = require("../
 
 router.post("/authentication", authenticateUser);
 router.put("/authentication", updateAccessToken);
-router.delete("/authentication/:refresh_token", removeRefreshToken);
+router.delete("/authentication/", removeRefreshToken);
 
 module.exports = router;

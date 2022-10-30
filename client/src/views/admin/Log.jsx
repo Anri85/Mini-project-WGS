@@ -1,37 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import useAxiosPrivate from "../../api/useAxiosPrivate";
-
-import CardDetailUser from "../../components/Cards/CardDetailUser";
 import ReactPaginate from "react-paginate";
 
-const DetailUser = () => {
-    const { id } = useParams();
-    const axiosPrivate = useAxiosPrivate();
+import useAxiosPrivate from "../../api/useAxiosPrivate";
+import DataLog from "../../components/Log/DataLog";
 
-    const [detailUser, setDetailUser] = useState();
-    const [response, setResponse] = useState();
+const Log = () => {
+    const axiosPrivate = useAxiosPrivate();
+    const [logs, setLogs] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
 
-    // fungsi untuk mengambil detai user berdasarkan id
-    const getUser = async (id) => {
+    // fungsi untuk mengambil data log
+    const getLogs = async () => {
         try {
-            const response = await axiosPrivate.get(`/users/single/${id}`);
-            setDetailUser(response?.data?.data);
+            const response = await axiosPrivate.get("/logs");
+            setLogs(response?.data?.data);
         } catch (error) {
-            setResponse(error?.response?.data);
+            console.log(error);
         }
     };
 
     useEffect(() => {
-        getUser(id);
+        getLogs();
     }, []);
 
     // pengaturan untuk menampilkan data perhalaman
-    const PER_PAGE = 5;
+    const PER_PAGE = 15;
     const offset = currentPage * PER_PAGE;
-    const currentPageData = detailUser?.attendance.slice(offset, offset + PER_PAGE);
-    const pageCount = Math.ceil(detailUser?.attendance.length / PER_PAGE);
+    const currentPageData = logs.slice(offset, offset + PER_PAGE);
+    const pageCount = Math.ceil(logs.length / PER_PAGE);
 
     // fungsi untuk merubah halaman
     const handlePageClick = ({ selected: selectedPage }) => {
@@ -41,7 +37,7 @@ const DetailUser = () => {
     return (
         <div className="flex flex-wrap mt-4">
             <div className="w-full mb-12 xl:mb-0 px-4">
-                <CardDetailUser detailUser={detailUser} response={response} setDetailUser={setDetailUser} setResponse={setResponse} id={id} attendance={currentPageData} />
+                <DataLog logs={currentPageData} />
                 <ReactPaginate
                     previousLabel={"← Back"}
                     nextLabel={"Next →"}
@@ -58,4 +54,4 @@ const DetailUser = () => {
     );
 };
 
-export default DetailUser;
+export default Log;

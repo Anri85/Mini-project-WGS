@@ -14,7 +14,7 @@ exports.authenticateUser = async (req, res) => {
         const refresh_token = tokenManager.generateRefreshToken({ id, fullname, role });
         // simpan refresh token kedalam database
         await saveRefreshToken(refresh_token);
-        return res.status(200).json({ message: "Success", status: true, data: { access_token, refresh_token, role, id } });
+        return res.status(200).json({ message: "Success", status: true, data: { access_token, refresh_token, role, id, fullname } });
     } catch (error) {
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
@@ -28,7 +28,7 @@ exports.authenticateUser = async (req, res) => {
 // ketika user meminta acccess token baru berdasarkan refresh_token
 exports.updateAccessToken = async (req, res) => {
     try {
-        // ambil data request
+        // ambil data headers
         const refresh_token = req.headers.refresh_token;
         // verifikasi apakah refresh token tersimpan dalam database
         await findRefreshToken(refresh_token);
@@ -49,8 +49,8 @@ exports.updateAccessToken = async (req, res) => {
 // ketika user melakukan LOGOUT
 exports.removeRefreshToken = async (req, res) => {
     try {
-        // ambil data request
-        const { refresh_token } = req.params;
+        // ambil data headers
+        const refresh_token = req.headers.refresh_token;
         // verifikasi apakah refresh token tersedia dalam database
         await findRefreshToken(refresh_token);
         // jika refresh token tersedia maka hapus dalam database

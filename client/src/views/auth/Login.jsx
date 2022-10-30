@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-
 import axios from "axios";
 import { Navigate } from "react-router-dom";
+
+import { NETWORK_IP } from "../../utility/utils";
 
 const useAuth = () => {
     const userData = localStorage.getItem("user");
@@ -18,7 +19,7 @@ const Login = () => {
         e.preventDefault();
         if (auth?.username !== "" && auth?.password !== "") {
             try {
-                const result = await axios.post("http://localhost:5000/api/user/authentication", auth);
+                const result = await axios.post(`${NETWORK_IP}/api/user/authentication`, auth);
                 localStorage.setItem("user", JSON.stringify(result?.data?.data));
                 setResponse({ ...response, message: result?.data?.message, status: result?.data?.status });
                 window.location.replace("/");
@@ -86,7 +87,7 @@ const Login = () => {
 
                                     <div className="text-center mt-6">
                                         <button
-                                            className="bg-black-800 text-black active:bg-blueGray-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none mr-1 mb-1 w-full"
+                                            className="bg-blue-500 text-white text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none mr-1 mb-1 w-full"
                                             type="submit"
                                             onClick={handleSubmit}
                                         >

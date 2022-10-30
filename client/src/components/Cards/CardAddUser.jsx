@@ -1,6 +1,4 @@
 import React, { useState } from "react";
-
-import authAxios from "../../utility/authAxios";
 import useAxiosPrivate from "../../api/useAxiosPrivate";
 
 const CardAddUser = () => {

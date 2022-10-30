@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import useAxiosPrivate from "../../api/useAxiosPrivate";
+import { NETWORK_IP } from "../../utility/utils";
 
 const CardProfile = ({ fullname, division, position, image_url, setResponse }) => {
     const axiosPrivate = useAxiosPrivate();
 
     const [data, setData] = useState({ fullname: fullname, division: division, position: position, profile: image_url });
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const [preview, setPreview] = useState();
 
     // fungsi untuk menampung perubahan file pada form
@@ -35,7 +38,7 @@ const CardProfile = ({ fullname, division, position, image_url, setResponse }) =
                             <div className="relative">
                                 <img
                                     alt="profile"
-                                    src={preview ? preview : `http://localhost:5000/images/${data?.profile}`}
+                                    src={preview ? preview : `${NETWORK_IP}/images/${data?.profile}`}
                                     className="shadow-xl h-44 w-64 rounded-full h-auto align-middle border-none absolute -m-16 -ml-20 lg:-ml-20 mr-8 max-w-150-px"
                                 />
                             </div>
@@ -58,7 +61,45 @@ const CardProfile = ({ fullname, division, position, image_url, setResponse }) =
                                     >
                                         Upload
                                     </button>
-                                    {/* <span className="text-sm text-blueGray-400">Friends</span> */}
+                                    {/* <button
+                                        className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                        onClick={() => setShowDropdown((prev) => !prev)}
+                                    >
+                                        Change profile{" "}
+                                        <svg className="ml-2 w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
+                                    <br />
+                                    {showDropdown && (
+                                        <div className="inline-flex mt-3 justify-center w-36 bg-gray-100 rounded divide-gray-400 shadow gray:bg-gray-400">
+                                            <div role="none">
+                                                <div className="flex px-4 py-2 text-sm" role="menuitem" tabIndex="-1" id="menu-item-2">
+                                                    <input
+                                                        id="today"
+                                                        type="file"
+                                                        name="images"
+                                                        className="hidden w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600"
+                                                        onChange={handleChange}
+                                                        required={true}
+                                                    />
+                                                    <label htmlFor="today" className="w-full text-sm font-medium text-gray-700 hover:cursor-pointer">
+                                                        Upload file
+                                                    </label>
+                                                </div>
+                                                <button className="">Button</button>
+                                                <hr />
+                                                <div className="flex px-4 py-2 text-sm" role="menuitem" tabIndex="-1" id="menu-item-2">
+                                                    <button
+                                                        className="rounded-md flex content-center text-gray-700 bg-transparent py-1 px-2 text-sm font-medium focus:outline-none"
+                                                        onClick={() => setShowModal(true)}
+                                                    >
+                                                        Take picture
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )} */}
                                 </div>
                             </div>
                         </div>

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 import useAxiosPrivate from "../../api/useAxiosPrivate";
+import { NETWORK_IP } from "../../utility/utils";
 
 const CardDetailUser = ({ detailUser, response, setDetailUser, setResponse, id, attendance }) => {
     const axiosPrivate = useAxiosPrivate();
@@ -25,6 +26,7 @@ const CardDetailUser = ({ detailUser, response, setDetailUser, setResponse, id, 
         }
     };
 
+    // fungsi untuk menangani perubahan inputan
     const handleChange = (e) => {
         setDetailUser({ ...detailUser, [e.target.name]: e.target.value });
     };
@@ -51,7 +53,7 @@ const CardDetailUser = ({ detailUser, response, setDetailUser, setResponse, id, 
                             <div className="w-full lg:w-4/12 px-4">
                                 <div className="relative w-full mb-3">
                                     <img
-                                        src={`http://localhost:5000/images/${detailUser?.image_url}`}
+                                        src={`${NETWORK_IP}/images/${detailUser?.image_url}`}
                                         alt=""
                                         className="flex-shrink-0 object-cover rounded-md dark:bg-gray-500 aspect-square"
                                         width={200}
@@ -201,7 +203,9 @@ const CardDetailUser = ({ detailUser, response, setDetailUser, setResponse, id, 
                                                                 <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                                                                     {da.id}
                                                                 </th>
-                                                                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">{da.date}</td>
+                                                                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                                                                    {new Date(da.date).toISOString().split("T")[0]}
+                                                                </td>
                                                                 <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left">
                                                                     <button
                                                                         className={

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 import useAxiosPrivate from "../../api/useAxiosPrivate";
+import { NETWORK_IP } from "../../utility/utils";
 
 const CardDetailAttendance = () => {
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -79,7 +80,7 @@ const CardDetailAttendance = () => {
                                     <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="status">
                                         Attendance Image
                                     </label>
-                                    <img src={`http://localhost:5000/attendance/${detailAttendance?.attendance_image}`} className="rounded-md" alt="attendance image" />
+                                    <img src={`${NETWORK_IP}/attendance/${detailAttendance?.attendance_image}`} className="rounded-md" alt="attendance image" />
                                 </div>
                             </div>
                             <div className="flex flex-wrap">
@@ -156,7 +157,7 @@ const CardDetailAttendance = () => {
                                             name="date"
                                             type="date"
                                             className="border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
-                                            value={detailAttendance?.date}
+                                            value={new Date(detailAttendance?.date).toISOString().split("T")[0]}
                                             readOnly={true}
                                         />
                                     </div>

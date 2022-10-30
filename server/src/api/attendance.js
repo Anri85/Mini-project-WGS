@@ -1,12 +1,25 @@
 const ClientError = require("../exceptions/ClientError");
 
-const { insertAttendance, selectAttendance, updateAttendance, removeAttendance, findAttendance } = require("../services/attendanceService");
+const {
+    insertAttendance,
+    selectAttendance,
+    updateAttendance,
+    removeAttendance,
+    findAttendance,
+    getAttendanceStatistic,
+    filterAttendance,
+} = require("../services/attendanceService");
 const { attendanceFileHandler } = require("../utils/attendanceFileHandler");
 
 // mengambil list attendance oleh user
 exports.getAttendanceList = async (req, res) => {
     try {
         if (req.decoded.role === "Super admin" || req.decoded.role === "Admin") {
+            if (req.params.filter !== "nothing") {
+                const arr = req.params.filter.split(",");
+                const attendance = await filterAttendance(arr);
+                return res.status(200).json({ message: "Success", status: true, data: attendance });
+            }
             const attendance = await selectAttendance();
             return res.status(200).json({ message: "Success", status: true, data: attendance });
         }
@@ -56,7 +69,6 @@ exports.getUserAttendance = async (req, res) => {
 exports.createAttendance = async (req, res) => {
     const { id } = req.params;
     const rawDate = new Date();
-    const date = rawDate.toISOString().split("T")[0];
     try {
         // cek jika id attendance tersedia (belum pernah absen time_in)
         if (id) {
@@ -81,7 +93,6 @@ exports.createAttendance = async (req, res) => {
         const data = await insertAttendance({
             status: "Attended",
             fullname: req.decoded.fullname,
-            date,
             time_in: rawDate.toLocaleString("id-ID", {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -94,6 +105,7 @@ exports.createAttendance = async (req, res) => {
         });
         return res.status(201).json({ message: "Success", status: true, data });
     } catch (error) {
+        console.log(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });
@@ -134,9 +146,23 @@ exports.deleteAttendance = async (req, res) => {
         const { role } = req.decoded;
         // hapus attendance berdasarkan id
         await removeAttendance(id, role);
-        return res.status(200).json({ message: "Success", status: false });
+        return res.status(200).json({ message: "Success", status: true });
     } catch (error) {
-        console.error(error);
+        // jika error merupakan kesalahan pengguna
+        if (error instanceof ClientError) {
+            return res.status(error.statusCode).json({ message: error.message, status: false });
+        }
+        // jika server mengalami error
+        return res.status(500).json({ message: "Something went wrong", status: false });
+    }
+};
+
+exports.attendanceAnalysis = async (req, res) => {
+    try {
+        const { users, absences, completed } = await getAttendanceStatistic();
+        const withoutExp = Number(users) - Number(absences);
+        return res.status(200).json({ message: "success", status: true, data: { users, absences, completed, withoutExp } });
+    } catch (error) {
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });

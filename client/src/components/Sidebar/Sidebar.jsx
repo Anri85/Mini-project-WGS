@@ -1,9 +1,9 @@
 /*eslint-disable*/
-import axios from "axios";
+import authAxios from "../../api";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import image from "../../assets/img/team-1-800x800.jpg";
+import { NETWORK_IP } from "../../utility/utils";
 
 const useAuth = () => {
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -25,7 +25,7 @@ const Sidebar = () => {
             const userData = JSON.parse(localStorage.getItem("user"));
             // jika terdapat user data maka panggil api untuk melakukan logout
             if (userData) {
-                await axios.delete(`http://localhost:5000/api/user/authentication/${userData?.refresh_token}`);
+                await authAxios.delete(`${NETWORK_IP}/api/user/authentication`);
                 localStorage.clear();
                 navigate("/login");
             }
@@ -190,6 +190,21 @@ const Sidebar = () => {
                                             Users List
                                         </Link>
                                     </li>
+
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/logs") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/logs"
+                                        >
+                                            <i className={"fa fa-exchange mr-2 text-sm " + (window.location.href.indexOf("/logs") !== -1 ? "opacity-75" : "text-blueGray-300")}></i>{" "}
+                                            Logs Record
+                                        </Link>
+                                    </li>
                                 </>
                             )}
                             {isAuth.role === "Admin" && (
@@ -242,6 +257,21 @@ const Sidebar = () => {
                                                 className={"fas fa-tools mr-2 text-sm " + (window.location.href.indexOf("/settings") !== -1 ? "opacity-75" : "text-blueGray-300")}
                                             ></i>{" "}
                                             Settings
+                                        </Link>
+                                    </li>
+
+                                    <li className="items-center">
+                                        <Link
+                                            className={
+                                                "text-xs uppercase py-3 font-bold block " +
+                                                (window.location.href.indexOf("/logs") !== -1
+                                                    ? "text-lightBlue-500 hover:text-lightBlue-600"
+                                                    : "text-blueGray-700 hover:text-blueGray-500")
+                                            }
+                                            to="/logs"
+                                        >
+                                            <i className={"fa fa-exchange mr-2 text-sm " + (window.location.href.indexOf("/logs") !== -1 ? "opacity-75" : "text-blueGray-300")}></i>{" "}
+                                            Logs Record
                                         </Link>
                                     </li>
                                 </>
