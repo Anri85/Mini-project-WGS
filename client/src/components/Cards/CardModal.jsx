@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 import useAxiosPrivate from "../../api/useAxiosPrivate";
 
-const Modal = ({ setOpenModal }) => {
+const Modal = ({ setOpenModal, IDattendance }) => {
     let stream;
     let video;
 
@@ -26,7 +26,7 @@ const Modal = ({ setOpenModal }) => {
                     video.play();
                 };
             })
-            // jika terjadi error
+            // jika terjadi error (akses pada kamera diblokir)
             .catch((error) => console.log(error));
     };
 
@@ -86,7 +86,11 @@ const Modal = ({ setOpenModal }) => {
                 // rubah foto tersebut menjadi base64
                 const base64 = element.toDataURL("image/jpeg", 0.1);
                 // kirimkan kepada backend
-                await axiosPrivate.post(`/attendance/create/${""}`, { base64: base64 });
+                if (IDattendance === undefined) {
+                    await axiosPrivate.post("/users/upload", { base64: base64, action: "Upload" });
+                } else {
+                    await axiosPrivate.post(`/attendance/create/${IDattendance}`, { base64: base64, action: IDattendance !== "" ? "Out" : "In" });
+                }
                 window.location.reload();
             }
         } else {
@@ -139,7 +143,7 @@ const Modal = ({ setOpenModal }) => {
                                         type="button"
                                         onClick={createBase64}
                                     >
-                                        Create Attendance
+                                        {IDattendance === undefined ? "Upload photo" : "Create Attendance"}
                                     </button>
                                 </>
                             ) : (

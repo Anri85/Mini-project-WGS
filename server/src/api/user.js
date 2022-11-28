@@ -1,14 +1,20 @@
 const ClientError = require("../exceptions/ClientError");
 
 const { addUser, selectUsers, selectSingleUser, selectSingleAnotherUser, deleteUser, updateUser, changeProfile } = require("../services/userService");
+const { base64FileHandler } = require("../utils/base64Handler");
 
 exports.getAllUsers = async (req, res) => {
     try {
         const { fullname } = req.query;
+        const page = Number(req.query.page) || 0;
+        const limit = Number(req.query.limit) || 5;
+        const offset = limit * page;
+
         // jika user yang mengakses adalah super admin atau admin maka akses tersebut diberikan
         if (req.decoded.role === "Super admin" || req.decoded.role === "Admin") {
-            const users = await selectUsers(fullname);
-            return res.status(200).json({ message: "Success", status: true, data: users });
+            const { users, totalRows } = await selectUsers(fullname, limit, offset);
+            const totalPage = Math.ceil(totalRows / limit);
+            return res.status(200).json({ message: "Success", status: true, data: users, page, limit, totalPage });
         }
         // jika user yang mengakses bukan super admin atau admin maka akses dilarang
         return res.status(403).json({ message: "Forbidden to access this resource", status: false });
@@ -112,9 +118,15 @@ exports.removeUser = async (req, res) => {
 
 exports.uploadImage = async (req, res) => {
     try {
-        // jika ada file yang diupload
+        const { id } = req.decoded;
+        // jika ada file yang diupload berasal dari webcam
+        if (req.body.base64) {
+            const filename = base64FileHandler(req.body.base64, req.body.action);
+            await changeProfile(id, filename);
+            return res.status(200).json({ message: "Success", status: true });
+        }
+        // jika ada file yang diupload bukan berasal dari webcam
         if (req.file) {
-            const { id } = req.decoded;
             const image = req.file.filename;
             // update imagge_url user yang melakukan upload tersebut
             await changeProfile(id, image);

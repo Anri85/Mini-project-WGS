@@ -24,7 +24,11 @@ exports.up = (pgm) => {
             type: "VARCHAR(50)",
             notNull: true,
         },
-        attendance_image: {
+        attendance_image_in: {
+            type: "VARCHAR(50)",
+            notNull: true,
+        },
+        attendance_image_out: {
             type: "VARCHAR(50)",
             notNull: true,
         },

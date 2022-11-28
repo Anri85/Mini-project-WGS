@@ -11,15 +11,20 @@ const AuthenticationError = require("../exceptions/AuthenticationError");
 const AuthorizationError = require("../exceptions/AuthorizationError");
 
 // select user
-const selectUsers = async (fullname) => {
+const selectUsers = async (fullname, limit, offset) => {
     let result;
+    let rowCount;
     if (fullname) {
-        result = await pool.query(`SELECT id, fullname, role, division, position, gender, image_url FROM users WHERE lower(fullname) LIKE '%${fullname.toLowerCase()}%'`);
-        return result.rows;
+        rowCount = await pool.query(`SELECT COUNT(id) FROM users WHERE lower(fullname) LIKE '%${fullname.toLowerCase()}%'`);
+        result = await pool.query(
+            `SELECT id, fullname, role, division, position, gender, image_url FROM users WHERE lower(fullname) LIKE '%${fullname.toLowerCase()}%' LIMIT ${limit} OFFSET ${offset}`
+        );
+        return { users: result.rows, totalRows: rowCount.rows[0].count };
     }
-    // jika tidak terdapat id maka ambil semua data user
-    result = await pool.query("SELECT id, fullname, role, division, position, gender, image_url FROM users");
-    return result.rows;
+    // jika tidak terdapat fullname maka ambil semua data user
+    rowCount = await pool.query(`SELECT COUNT(id) FROM users`);
+    result = await pool.query(`SELECT id, fullname, role, division, position, gender, image_url FROM users LIMIT ${limit} OFFSET ${offset}`);
+    return { users: result.rows, totalRows: rowCount.rows[0].count };
 };
 
 const selectSingleUser = async (id) => {

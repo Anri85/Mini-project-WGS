@@ -2,12 +2,15 @@ import React, { useState } from "react";
 import useAxiosPrivate from "../../api/useAxiosPrivate";
 import { NETWORK_IP } from "../../utility/utils";
 
+// components
+import CardModal from "./CardModal";
+
 const CardProfile = ({ fullname, division, position, image_url, setResponse }) => {
     const axiosPrivate = useAxiosPrivate();
 
     const [data, setData] = useState({ fullname: fullname, division: division, position: position, profile: image_url });
     const [showDropdown, setShowDropdown] = useState(false);
-    const [showModal, setShowModal] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
     const [preview, setPreview] = useState();
 
     // fungsi untuk menampung perubahan file pada form
@@ -39,15 +42,17 @@ const CardProfile = ({ fullname, division, position, image_url, setResponse }) =
                                 <img
                                     alt="profile"
                                     src={preview ? preview : `${NETWORK_IP}/images/${data?.profile}`}
-                                    className="shadow-xl h-44 w-64 rounded-full h-auto align-middle border-none absolute -m-16 -ml-20 lg:-ml-20 mr-8 max-w-150-px"
+                                    className="shadow-xl rounded-full h-40 w-48 align-middle border-none absolute -m-16 -ml-20 lg:-ml-20 mr-8 max-w-150-px"
+                                    // height="400"
+                                    // width="300"
                                 />
                             </div>
                         </div>
                         <div className="w-full px-4 text-center mt-20">
                             <div className="flex justify-center py-4 lg:pt-4 pt-8">
-                                <div className="mr-4 p-3 text-center mt-5">
-                                    <label className="block mb-2 text-sm font-extrabold text-gray-300">Change Picture</label>
-                                    <input
+                                <div className="p-3 text-center mt-5">
+                                    {/* <label className="block mb-2 text-sm font-extrabold text-gray-300">Change Picture</label> */}
+                                    {/* <input
                                         className="border-0 mb-2 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm focus:outline-none focus:ring w-full ease-linear transition-all duration-150"
                                         name="images"
                                         type="file"
@@ -60,8 +65,8 @@ const CardProfile = ({ fullname, division, position, image_url, setResponse }) =
                                         onClick={handleUpload}
                                     >
                                         Upload
-                                    </button>
-                                    {/* <button
+                                    </button> */}
+                                    <button
                                         className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-1 px-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                         onClick={() => setShowDropdown((prev) => !prev)}
                                     >
@@ -75,31 +80,39 @@ const CardProfile = ({ fullname, division, position, image_url, setResponse }) =
                                         <div className="inline-flex mt-3 justify-center w-36 bg-gray-100 rounded divide-gray-400 shadow gray:bg-gray-400">
                                             <div role="none">
                                                 <div className="flex px-4 py-2 text-sm" role="menuitem" tabIndex="-1" id="menu-item-2">
-                                                    <input
-                                                        id="today"
-                                                        type="file"
-                                                        name="images"
-                                                        className="hidden w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600"
-                                                        onChange={handleChange}
-                                                        required={true}
-                                                    />
-                                                    <label htmlFor="today" className="w-full text-sm font-medium text-gray-700 hover:cursor-pointer">
-                                                        Upload file
+                                                    <input id="upload" type="file" name="images" className="hidden" onChange={handleChange} required={true} />
+                                                    <label htmlFor="upload" className="w-full text-sm font-medium text-gray-700 hover:cursor-pointer">
+                                                        Select File
                                                     </label>
                                                 </div>
-                                                <button className="">Button</button>
-                                                <hr />
-                                                <div className="flex px-4 py-2 text-sm" role="menuitem" tabIndex="-1" id="menu-item-2">
-                                                    <button
-                                                        className="rounded-md flex content-center text-gray-700 bg-transparent py-1 px-2 text-sm font-medium focus:outline-none"
-                                                        onClick={() => setShowModal(true)}
-                                                    >
-                                                        Take picture
-                                                    </button>
-                                                </div>
+                                                {preview ? (
+                                                    <>
+                                                        <hr />
+                                                        <div className="flex px-4 py-2 text-sm" role="menuitem" tabIndex="-1" id="menu-item-2">
+                                                            <button
+                                                                className="rounded-md bg-indigo-600 flex content-center text-gray-700 py-1 px-2 text-sm text-white font-medium focus:outline-none"
+                                                                onClick={handleUpload}
+                                                            >
+                                                                Upload
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <hr />
+                                                        <div className="flex px-4 py-2 text-sm" role="menuitem" tabIndex="-1" id="menu-item-2">
+                                                            <button
+                                                                className="rounded-md flex content-center text-gray-700 bg-transparent py-1 px-2 text-sm font-medium focus:outline-none"
+                                                                onClick={() => setOpenModal(true)}
+                                                            >
+                                                                Take picture
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
-                                    )} */}
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -117,6 +130,11 @@ const CardProfile = ({ fullname, division, position, image_url, setResponse }) =
                     </div>
                 </div>
             </div>
+            {openModal && (
+                <>
+                    <CardModal setOpenModal={setOpenModal} IDattendance={undefined} />
+                </>
+            )}
         </>
     );
 };

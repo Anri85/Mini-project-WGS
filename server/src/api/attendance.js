@@ -9,19 +9,26 @@ const {
     getAttendanceStatistic,
     filterAttendance,
 } = require("../services/attendanceService");
-const { attendanceFileHandler } = require("../utils/attendanceFileHandler");
+const { base64FileHandler } = require("../utils/base64Handler");
 
 // mengambil list attendance oleh user
 exports.getAttendanceList = async (req, res) => {
     try {
         if (req.decoded.role === "Super admin" || req.decoded.role === "Admin") {
+            const page = Number(req.query.page) || 0;
+            const limit = Number(req.query.limit) || 5;
+            const offset = limit * page;
+
             if (req.params.filter !== "nothing") {
                 const arr = req.params.filter.split(",");
-                const attendance = await filterAttendance(arr);
-                return res.status(200).json({ message: "Success", status: true, data: attendance });
+                const { attendance, totalRows } = await filterAttendance(arr, limit, offset);
+                const totalPage = Math.ceil(totalRows / limit);
+                return res.status(200).json({ message: "Success", status: true, data: attendance, page, limit, totalPage });
             }
-            const attendance = await selectAttendance();
-            return res.status(200).json({ message: "Success", status: true, data: attendance });
+
+            const { attendance, totalRows } = await selectAttendance(null, limit, offset);
+            const totalPage = Math.ceil(totalRows / limit);
+            return res.status(200).json({ message: "Success", status: true, data: attendance, page, limit, totalPage });
         }
         return res.status(403).json({ message: "Forbidden to access this resource", status: false });
     } catch (error) {
@@ -49,12 +56,18 @@ exports.getDetailAttendance = async (req, res) => {
     }
 };
 
-// get detail attendance by all user
+// get detail attendance by specific user
 exports.getUserAttendance = async (req, res) => {
     try {
         const { id } = req.params;
-        const attendance = await selectAttendance(id);
-        return res.status(200).json({ message: "Success", status: true, data: attendance });
+
+        const page = Number(req.query.page) || 0;
+        const limit = Number(req.query.limit) || 5;
+        const offset = limit * page;
+
+        const { attendance, totalRows } = await selectAttendance(id, limit, offset);
+        const totalPage = Math.ceil(totalRows / limit);
+        return res.status(200).json({ message: "Success", status: true, data: attendance, page, limit, totalPage });
     } catch (error) {
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
@@ -67,12 +80,15 @@ exports.getUserAttendance = async (req, res) => {
 
 // membuat kehadiran atau mengupdate kehadiran yang ada
 exports.createAttendance = async (req, res) => {
+    let filename;
+
     const { id } = req.params;
     const rawDate = new Date();
     try {
-        // cek jika id attendance tersedia (belum pernah absen time_in)
+        // cek jika id attendance tersedia (sudah pernah absen time_in)
         if (id) {
             // jika tersedia maka lakukan update attendance berdasarkan id tersebut
+            filename = base64FileHandler(req.body.base64, req.body.action);
             const attendanceId = await updateAttendance(
                 id,
                 {
@@ -83,13 +99,14 @@ exports.createAttendance = async (req, res) => {
                         second: "2-digit",
                         hour12: true,
                     }),
+                    attendance_image_out: filename,
                 },
                 { isUpdate: false }
             );
             return res.status(201).json({ message: "Success", status: true, data: { id: attendanceId } });
         }
         // jika tidak tersedia maka create attendance baru (belum absen pada hari itu) juga proses string base64 dari frontend
-        const filename = attendanceFileHandler(req.body.base64);
+        filename = base64FileHandler(req.body.base64, req.body.action);
         const data = await insertAttendance({
             status: "Attended",
             fullname: req.decoded.fullname,
@@ -100,7 +117,8 @@ exports.createAttendance = async (req, res) => {
                 hour12: true,
             }),
             time_out: "",
-            attendance_image: filename,
+            attendance_image_in: filename,
+            attendance_image_out: "",
             user_id: req.decoded.id,
         });
         return res.status(201).json({ message: "Success", status: true, data });
@@ -129,6 +147,7 @@ exports.editAttendance = async (req, res) => {
         }
         return res.status(403).json({ message: "Forbidden to access this resource", status: false });
     } catch (error) {
+        console.log(error);
         // jika error merupakan kesalahan pengguna
         if (error instanceof ClientError) {
             return res.status(error.statusCode).json({ message: error.message, status: false });

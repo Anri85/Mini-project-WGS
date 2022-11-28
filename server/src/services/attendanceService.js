@@ -1,5 +1,6 @@
 const { Pool } = require("pg");
 const { nanoid } = require("nanoid");
+const fs = require("fs");
 const pool = new Pool();
 
 // import exceptions
@@ -7,24 +8,30 @@ const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 
 // select attendance
-const selectAttendance = async (id) => {
+const selectAttendance = async (id, limit, offset) => {
     // jika terdapat parameter id ambil detail attendance beserta user yang melakukannya
-    if (id) {
+    if (id !== null) {
         // merancang perintah query
-        const order = {
-            text: `SELECT * FROM attendance WHERE user_id = $1 ORDER BY created_at DESC`,
+        const order1 = {
+            text: `SELECT * FROM attendance WHERE user_id = $1 ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
             values: [id],
         };
         // mengeksekusi query
-        const result = await pool.query(order);
+        const result = await pool.query(order1);
+        const order2 = {
+            text: `SELECT COUNT(id) FROM attendance WHERE user_id = $1`,
+            values: [id],
+        };
+        const countRows = await pool.query(order2);
         if (!result.rowCount) {
             throw new NotFoundError("Attendance not found");
         }
-        return result.rows;
+        return { attendance: result.rows, totalRows: countRows.rows[0].count };
     } else {
         // jika tidak terdapat id maka ambil seluruh data attendance
-        const result = await pool.query("SELECT * FROM attendance ORDER BY created_at DESC");
-        return result.rows;
+        const countRows = await pool.query("SELECT COUNT(id) FROM attendance");
+        const result = await pool.query(`SELECT * FROM attendance ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`);
+        return { attendance: result.rows, totalRows: countRows.rows[0].count };
     }
 };
 
@@ -32,7 +39,7 @@ const selectAttendance = async (id) => {
 const findAttendance = async (id) => {
     const order = {
         text: `SELECT users.id AS user_id, users.fullname, users.division, users.position, users.role, attendance.id, attendance.date, attendance.status, attendance.time_in,
-        attendance.time_out, attendance.attendance_image FROM attendance JOIN users ON users.id = attendance.user_id WHERE attendance.id = $1`,
+        attendance.time_out, attendance.attendance_image_in, attendance.attendance_image_out FROM attendance JOIN users ON users.id = attendance.user_id WHERE attendance.id = $1`,
         values: [id],
     };
     const result = await pool.query(order);
@@ -42,13 +49,18 @@ const findAttendance = async (id) => {
     return result.rows[0];
 };
 
-const filterAttendance = async (arr) => {
-    const order = {
-        text: `SELECT * FROM attendance WHERE ${arr[0]} = $1 ORDER BY created_at DESC`,
+const filterAttendance = async (arr, limit, offset) => {
+    const order1 = {
+        text: `SELECT * FROM attendance WHERE ${arr[0]} = $1 ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`,
         values: [arr[1]],
     };
-    const result = await pool.query(order);
-    return result.rows;
+    const order2 = {
+        text: `SELECT COUNT(id) FROM attendance WHERE ${arr[0]} = $1`,
+        values: [arr[1]],
+    };
+    const result = await pool.query(order1);
+    const countRows = await pool.query(order2);
+    return { attendance: result.rows, totalRows: countRows.rows[0].count };
 };
 
 // membuat attendance
@@ -56,8 +68,8 @@ const insertAttendance = async (data) => {
     const id = `attendance-${nanoid(16)}`;
     // merancang perintah query
     const order = {
-        text: "INSERT INTO attendance VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-        values: [id, data.fullname, data.status, data.time_in, data.time_out, data.attendance_image, data.user_id],
+        text: "INSERT INTO attendance VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+        values: [id, data.fullname, data.status, data.time_in, data.time_out, data.attendance_image_in, data.attendance_image_out, data.user_id],
     };
     // mengeksekusi query
     const result = await pool.query(order);
@@ -81,26 +93,32 @@ const updateAttendance = async (id, data, { isUpdate }) => {
                 hour12: true,
             });
         }
+        // jika terjadi perubahan status unattended ke status attended
         if (data.time_out === "") {
             data.status = "Attended";
+            // hapus file gambar time out
+            fs.unlink(`${process.cwd()}/public/attendance/time_out/${data.attendance_image_out}`, (err) => {
+                if (err) throw new InvariantError("Attendance change failed");
+            });
+            data.attendance_image_out = "";
         }
         // merancang perintah query
         const order = {
-            text: "UPDATE attendance SET status = $1, time_in = $2, time_out = $3 WHERE id = $4 RETURNING id",
-            values: [data.status, data.time_in, data.time_out, id],
+            text: "UPDATE attendance SET status = $1, time_in = $2, time_out = $3, attendance_image_out = $4 WHERE id = $5 RETURNING id",
+            values: [data.status, data.time_in, data.time_out, data.attendance_image_out, id],
         };
         // mengeksekusi query
         const result = await pool.query(order);
         if (!result.rows[0].id) {
             throw new InvariantError("Attendance change failed");
         }
-        return result.rows[0].id;
-        // jika isUpdate tidak bernilai true maka attendance dilakukan oleh user
+        return result.rows[0];
+        // jika isUpdate tidak bernilai true maka user melakukan time_out
     } else {
         // merancang perintah query
         const order = {
-            text: "UPDATE attendance SET status = $1, time_out = $2 WHERE id = $3 RETURNING id",
-            values: [data.status, data.time_out, id],
+            text: "UPDATE attendance SET status = $1, time_out = $2, attendance_image_out = $3 WHERE id = $4 RETURNING id",
+            values: [data.status, data.time_out, data.attendance_image_out, id],
         };
         // mengeksekusi query
         const result = await pool.query(order);

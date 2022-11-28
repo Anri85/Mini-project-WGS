@@ -18,6 +18,9 @@ const CardDetailAttendance = () => {
         try {
             const result = await axiosPrivate.get(`/attendance/list/detail/${id}`);
             setDetailAttendance(result?.data?.data);
+            if (result?.data?.data?.attendance_image_out === "" && result?.data?.data?.status === "Unattended") {
+                setResponse({ ...response, status: false, message: "This attendance was edited by admin, please more careful next time!" });
+            }
         } catch (error) {
             setResponse(error?.response?.data);
         }
@@ -39,6 +42,7 @@ const CardDetailAttendance = () => {
                         status: detailAttendance?.status,
                         time_in: detailAttendance?.time_in,
                         time_out: detailAttendance?.time_out,
+                        attendance_image_out: detailAttendance?.attendance_image_out,
                         prevStatus: detailAttendance?.prevStatus,
                     });
                     setResponse(result?.data);
@@ -75,13 +79,25 @@ const CardDetailAttendance = () => {
                         <form>
                             <h6 className="text-blueGray-400 text-sm mt-3 mb-6 font-bold uppercase">Attendance Information</h6>
                             <hr className="mt-6 border-b-1 border-blueGray-300 mb-3" />
-                            <div className="w-full lg:w-4/12 px-4">
-                                <div className="relative w-full mb-3">
-                                    <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="status">
-                                        Attendance Image
-                                    </label>
-                                    <img src={`${NETWORK_IP}/attendance/${detailAttendance?.attendance_image}`} className="rounded-md" alt="attendance image" />
+                            <div className="flex flex-wrap">
+                                <div className="w-full lg:w-4/12 px-4">
+                                    <div className="relative w-full mb-3">
+                                        <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="status">
+                                            Attendance Image In
+                                        </label>
+                                        <img src={`${NETWORK_IP}/attendance/time_in/${detailAttendance?.attendance_image_in}`} className="rounded-md" alt="attendance in" />
+                                    </div>
                                 </div>
+                                {detailAttendance?.attendance_image_out !== "" && (
+                                    <div className="w-full lg:w-4/12 px-4">
+                                        <div className="relative w-full mb-3">
+                                            <label className="block uppercase text-blueGray-600 text-xs font-bold mb-2" htmlFor="status">
+                                                Attendance Image Out
+                                            </label>
+                                            <img src={`${NETWORK_IP}/attendance/time_out/${detailAttendance?.attendance_image_out}`} className="rounded-md" alt="attendance out" />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="flex flex-wrap">
                                 <div className="w-full lg:w-4/12 px-4">

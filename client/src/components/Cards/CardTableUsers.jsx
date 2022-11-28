@@ -5,11 +5,10 @@ import { Link } from "react-router-dom";
 import useAxiosPrivate from "../../api/useAxiosPrivate";
 import { NETWORK_IP } from "../../utility/utils";
 
-const CardTableUsers = ({ color, users, response, setResponse, getAllUsers }) => {
+const CardTableUsers = ({ color, users, response, setResponse, getAllUsers, setSearch }) => {
     const axiosPrivate = useAxiosPrivate();
     const userData = JSON.parse(localStorage.getItem("user"));
 
-    const [search, setSearch] = useState();
     const [checked, setChecked] = useState(new Array(users.length).fill(false));
     const [IDs, setIDs] = useState([]);
 
@@ -21,6 +20,7 @@ const CardTableUsers = ({ color, users, response, setResponse, getAllUsers }) =>
                     const result = await axiosPrivate.delete(`/users/delete/${id}`);
                     setResponse({ ...response, message: result?.data?.message, status: result?.data?.status });
                     setChecked([]);
+                    setIDs([]);
                     getAllUsers();
                     return false;
                 }
@@ -29,16 +29,6 @@ const CardTableUsers = ({ color, users, response, setResponse, getAllUsers }) =>
                 getAllUsers();
             }
             return false;
-        } catch (error) {
-            response({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status });
-        }
-    };
-
-    // fungsi untuk merekam pencarian user dari form pencarian
-    const handleChange = async (e) => {
-        try {
-            setSearch(e.target.value);
-            getAllUsers(search);
         } catch (error) {
             response({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status });
         }
@@ -73,7 +63,7 @@ const CardTableUsers = ({ color, users, response, setResponse, getAllUsers }) =>
                                     type="text"
                                     placeholder="Search here..."
                                     className="border-0 px-2 py-2 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded text-sm shadow outline-none focus:outline-none focus:ring pl-10"
-                                    onChange={handleChange}
+                                    onChange={(e) => setSearch(e.target.value)}
                                 />
                             </form>
                         </div>

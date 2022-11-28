@@ -1,29 +1,17 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-import useAxiosPrivate from "../../api/useAxiosPrivate";
-
 // components
 import CardModal from "./CardModal";
 
-const userData = JSON.parse(localStorage.getItem("user"));
-
-const CardEmployeeAttendance = ({ myAttendance, isAttendToday, response, setResponse, getMyAttendance }) => {
-    const axiosPrivate = useAxiosPrivate();
+const CardEmployeeAttendance = ({ myAttendance, isAttendToday, response, setResponse }) => {
     const [openModal, setOpenModal] = useState(false);
+    const [IDattendance, setIDAttendance] = useState();
 
     // fungsi untuk membuat attendance
     const createAttendance = async (attendanceId) => {
-        if (attendanceId === "") {
-            setOpenModal(true);
-        } else {
-            try {
-                await axiosPrivate.post(`/attendance/create/${attendanceId}`);
-                getMyAttendance(userData?.id);
-            } catch (error) {
-                setResponse({ ...response, message: error?.response?.data?.message, status: error?.response?.data?.status, statusCode: error?.response?.status });
-            }
-        }
+        setIDAttendance(attendanceId);
+        setOpenModal(true);
     };
 
     return (
@@ -163,7 +151,7 @@ const CardEmployeeAttendance = ({ myAttendance, isAttendToday, response, setResp
             </div>
             {openModal && (
                 <>
-                    <CardModal setOpenModal={setOpenModal} />
+                    <CardModal setOpenModal={setOpenModal} IDattendance={IDattendance} />
                 </>
             )}
         </>
